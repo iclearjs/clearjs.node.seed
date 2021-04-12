@@ -14,8 +14,8 @@
   "main": "background.js",
   "dependencies": {
     "@antv/g6": "^3.7.0",
-    "@clearjs/node": "0.0.1",
-    "@clearui/vue": "0.0.2",
+    "@clearjs/node": "0.0.2",
+    "@clearui/vue": "0.0.3",
     "ant-design-vue": "^1.7.2",
     "axios": "^0.18.0",
     "chromedriver": "^83.0.0",

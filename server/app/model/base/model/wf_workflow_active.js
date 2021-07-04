@@ -1,32 +1,32 @@
 'use strict';
 
-
-
 module.exports = app => {
-    const model = require('path').basename(__filename, '.js');
-    let workflowKey = {
-        idBill:{
-            type: app.mongoose.Types.ObjectId,
+
+    const collection = require('path').basename(__filename, '.js');
+
+    const attributes = {
+        idBill: {
+            name: 'idBill',
+            type: app.mongoose.Schema.ObjectId
         },
-        workId:{
-            type: String,
+        workId: {
+            name: 'workId',
+            type: String
         },
         idPage: {
-            type: app.mongoose.Types.ObjectId,
-            ref:'cdp_page'
+            name: 'idPage',
+            type: app.mongoose.Schema.ObjectId,
+            ref: 'cdp_page'
         },
-    };
-    const attributes = {
-        ...workflowKey,
-        /* 流程 字段 */
         idWorkflow: {
-            type: app.mongoose.Types.ObjectId,
-            ref:'wf_workflow'
+            name: 'idWorkflow',
+            type: app.mongoose.Schema.ObjectId,
+            ref: 'wf_workflow'
         },
-
     };
 
-    const schema = app.MongooseSchema(model, attributes);
+    const schema = app.MongooseSchema(collection, attributes, true, false, false);
 
-    return app.mongooseDB.get('default').model(model, schema, model);
+    return app.mongooseDB.get('default').model(collection, require('fs').existsSync(require('path').resolve(__dirname, '../middleware/' + collection + '.js')) ? require('../middleware/' + collection)(app, schema) : schema, collection);
+
 };

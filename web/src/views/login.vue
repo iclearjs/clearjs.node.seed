@@ -1,5 +1,6 @@
 <template>
     <div class="login">
+        <img src="../assets/logo_white.png" height="64"  style="float: left;margin:24px 0 0 24px"/>
         <div class="login-form" style="-webkit-app-region: no-drag">
             <a-card title="登录" :body-style="{padding:'24px 48px'}">
                 <a slot="extra">没有账号,立即注册？</a>
@@ -21,7 +22,7 @@
                     </a-form-model-item>
                     <a-form-model-item>
                         <a-button type="primary" @click="doLogin" block>立即登录</a-button>
-                        <a-button v-if="$electron" type="danger" @click="$electron.remote.app.quit()" block>退出系统</a-button>
+                        <a-button v-if="isElectron" type="danger" @click="$electron.remote.app.quit()" block>退出系统</a-button>
                     </a-form-model-item>
                     <div class="user-login-other">
                         <a>
@@ -39,8 +40,7 @@
         </div>
         <a-modal v-model="visible" :footer="null" :width="1024" :mask-closable="false" :closable="false" :body-style="{padding:0}">
             <a-card title="已加入组织" :bordered="false" :extra="user&&user.userName+',您好，欢迎使用'">
-                <a-row v-if="organUsers.filter((item)=>{return item.userType==='Admin'|| item.userType==='User'}).length>0"
-                       type="flex" justify="start">
+                <a-row v-if="organUsers.filter((item)=>{return item.userType==='Admin'|| item.userType==='User'}).length>0" type="flex" justify="start">
                     <template v-for="organUser of organUsers">
                         <a-col span="4" style="padding: 0 10px 10px 0;min-width: 150px"
                                v-if="organUser.userType==='Admin'||organUser.userType==='User'" :key="organUser._id">
@@ -112,10 +112,13 @@
             // }
         },
         computed:{
-          ...mapGetters(['user']),
+          ...mapGetters(['user','module']),
+            isElectron(){
+              return !!this.$electron;
+            }
         },
         methods: {
-            ...mapActions(['Logout','SetUser','SetToken','SetGroup','SetOrgan']),
+            ...mapActions(['Logout','SetUser','SetToken','SetGroup','SetOrgan','ToggleModule']),
             changeRemember(e) {
                 this.$ls.set('USER_REMEMBER', e.target.checked);
             },
@@ -148,8 +151,9 @@
             },
             goWelcome(organUser) {
                 this.SetToken(organUser._id);
-                this.SetGroup(organUser.idOrgan.idGroupOrgan)
-                this.$router.push({name: 'welcome'})
+                this.SetGroup(organUser.idOrgan.idGroupOrgan);
+                this.ToggleModule(this.module);
+                this.$router.push({name: 'dash'})
             }
         }
     };

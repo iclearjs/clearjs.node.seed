@@ -1,9 +1,9 @@
 'use strict';
 
-module.exports = (app,schema) => {
+module.exports = (app, schema) => {
     /**https://mongoosejs.com/docs/middleware.html*/
 
-    schema.pre('save',async (next)=>{
+    schema.pre('save', async (next) => {
         next();
     })
 

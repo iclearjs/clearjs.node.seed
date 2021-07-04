@@ -30,16 +30,18 @@ module.exports = appInfo => {
             '.pdf',
             '.txt',
             '.doc',
-            '.xlsx',
-            '.xls',
             '.docx',
+            '.xls',
+            '.xlsx',
+            '.ppt',
+            '.pptx',
         ],
     };
 
     config.io = {
         namespace: {
             '/': {
-                connectionMiddleware: ['socketConnect'],
+                connectionMiddleware: ['connection'],
                 packetMiddleware: [],
             },
         },
@@ -89,9 +91,7 @@ module.exports = appInfo => {
 
     config.view = {
         defaultViewEngine: 'nunjucks',
-        root: [
-            require('path').join(appInfo.baseDir, 'app/views'),
-        ].join(',')
+        root: [require('path').join(appInfo.baseDir, 'app/views')].join(',')
     };
 
     config.io = {

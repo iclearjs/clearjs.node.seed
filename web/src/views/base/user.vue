@@ -2,15 +2,12 @@
     <a-card :bordered="false">
         <c-button-group style="margin-bottom: 6px"  :buttons="menu.buttons.default" @click="click" :buttonsDisabled="buttonsDisabled" :record="selectedRow" :showSave="PageView==='editing'" :showBack="PageView==='edit'" :showBatch="PageView!=='edit'">
             <a-input-search v-if="['list','export'].includes(PageView)" v-model="query.like" slot="right" style="width: 200px" placeholder="请输入关键字"  enter-button="搜索"  @search="onTableChange({...query,page:1})">
-                <c-filters slot="addonAfter"  ref="cFilter" :filter="filter" style="display: inline-block"  :uid="PageConfig._id" @on-search="onSearch"></c-filters>
+                <c-filter slot="addonAfter"  ref="cFilter" :filter="filter" style="display: inline-block"  :idPage="PageConfig._id" :fields="PageConfig.widgets.filter(item=>item.mode==='listCard'&&item.listVisible===true)" @on-search="onSearch"></c-filter>
             </a-input-search>
         </c-button-group>
-        <c-page-list  v-if="['list','export'].includes(PageView)"  :columns="PageConfig.widgets.filter(item=>{return item.mode=== (PageView==='list'?'listCard':'list')} )" :records="records" :count="count" :selectedRow.sync="selectedRow" :selectedRows.sync="selectedRows" :selectedRowKeys.sync="selectedRowKeys" :rowKey="rowKey" :selectType="selectType" :loading="loading" @onTableChange="onTableChange" :query.sync="query" :custom-row="customRow" :show-tabs="false"></c-page-list>
+        <c-page-list  v-if="['list','export'].includes(PageView)"  :columns="PageConfig.widgets.filter(item=>{return item.mode=== (PageView==='list'?'listCard':'list')} )" :records="records" :count="count" :selectedRow.sync="selectedRow" :selectedRows.sync="selectedRows" :selectedRowKeys.sync="selectedRowKeys" :rowKey="rowKey" :selectType="selectType" :loading="loading" @onTableChange="onTableChange" :query.sync="query" :custom-row="customRow" :show-tabs="true"></c-page-list>
         <c-page-edit v-if="['edit','editing'].includes(PageView)" :columns="PageConfig.widgets.filter(item=>item.mode==='listCard')" :beforeRecordChange="beforeRecordChange" :onRecordChange="onRecordChange"  :loading="loading"  v-model="selectedRow" :disabled="PageView==='edit'"></c-page-edit>
-
-        <a-modal :title="eventModal.title" v-model="eventModal.visible"  :maskClosable="false" destroyOnClose
-                 :body-style="{paddingTop:0}"
-                 @ok="eventModalOk(eventModal.form,eventModal.event)" @cancel="resetForm()">
+        <a-modal :title="eventModal.title" v-model="eventModal.visible"  :maskClosable="false" destroyOnClose :body-style="{paddingTop:0}" @ok="eventModalOk(eventModal.form,eventModal.event)" @cancel="resetForm()">
             <a-form-model  ref="eventModal" :model="eventModal.form" :label-col="eventModal.labelCol" :wrapper-col="eventModal.wrapperCol">
                 <a-form-model-item label="离职日期" :required="true" v-if="eventModal.event === 'leaveWork'">
                     <a-date-picker  v-model="eventModal.form.leaveDate" valueFormat="YYYY-MM-DD" />
@@ -18,19 +15,14 @@
                 <a-form-model-item label="停薪期间" :required="true" v-if="eventModal.event === 'leaveWork'">
                     <c-input-refer refer="sc_period_refer"  v-model="eventModal.form.endPeriod" display="periodCode" storage="_id"></c-input-refer>
                 </a-form-model-item>
-
                 <a-form-model-item label="薪酬类别" :required="true" v-if="['changeCL','entryWork'].includes(eventModal.event)">
-                    <c-input-refer refer="cm_compensationCl_refer" v-model="eventModal.form.idCompensationCl" display="compensationClName"
-                                   storage="_id" placeholder="薪酬类别"></c-input-refer>
+                    <c-input-refer refer="cm_compensationCl_refer" v-model="eventModal.form.idCompensationCl" display="compensationClName" storage="_id" placeholder="薪酬类别"></c-input-refer>
                 </a-form-model-item>
                 <a-form-model-item label="启薪期间" :required="true" v-if="['changeCL','entryWork'].includes(eventModal.event)">
                     <c-input-refer refer="sc_period_refer"  v-model="eventModal.form.startPeriod" display="periodCode" storage="_id"></c-input-refer>
                 </a-form-model-item>
-
             </a-form-model>
         </a-modal>
-
-
     </a-card>
 </template>
 

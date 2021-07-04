@@ -2,26 +2,39 @@ import Vue from 'vue'
 import {updateTheme} from "@/components/ToggleColor";
 import {loadLanguageAsync} from '@/i18n'
 import router from '../../router'
+import config from '@/config/config.default'
 
 const app = {
     state: {
-        uid: '',
-        theme: '',
-        color: '',
+        module: '',
         menu: {
-            key: 'dash'
+            key: 'dash',
+            title: '首页',
+            routeName: 'dash',
+            idApplication:config.module,
+            closable: false
         },
+        layout:'',
+        color: '',
         multiTab: true,
         lang: 'zh-CN'
     },
     mutations: {
+        TOGGLE_LAYOUT: (state, layout) => {
+            Vue.ls.set('LAYOUT', layout);
+            state.layout = layout;
+        },
+        TOGGLE_MODULE: (state, module) => {
+            Vue.ls.set('MODULE', module);
+            state.module = module
+        },
+        TOGGLE_MENU: (state, menu) => {
+            Vue.ls.set('MENU', menu);
+            state.menu = menu
+        },
         TOGGLE_LANG: (state, color) => {
             Vue.ls.set('LANG', color);
             state.lang = color;
-        },
-        TOGGLE_THEME: (state, theme) => {
-            Vue.ls.set('THEME', theme);
-            state.theme = theme
         },
         TOGGLE_COLOR: (state, color) => {
             Vue.ls.set('COLOR', color);
@@ -30,32 +43,30 @@ const app = {
         TOGGLE_MULTI_TAB: (state, bool) => {
             Vue.ls.set('MULTI_TAB', bool);
             state.multiTab = bool
-        },
-        TOGGLE_APP: (state, uid) => {
-            Vue.ls.set('UID', uid);
-            state.uid = uid
-        },
-        TOGGLE_MENU: (state, menu) => {
-            Vue.ls.set('MENU', menu);
-            state.menu = menu
         }
     },
     actions: {
-        ToggleApp({commit,dispatch}, app) {
+        ToggleLayout({commit}, layout) {
+            commit('TOGGLE_LAYOUT', layout)
+        },
+        ToggleModule({commit,dispatch}, module) {
             return new Promise((resolve, reject) => {
-                commit('TOGGLE_APP', app);
-                router.loadDynamicRoutes(app).then(() => {
-                    if (Vue.$cookies.get('access_token')) {
-                        Vue.ls.get('MENU') && dispatch('ToggleMenu', Vue.ls.get('MENU'))
-                    }
+                commit('TOGGLE_MODULE', module);
+                router.loadDynamicRoutes(module).then(() => {
                     resolve()
                 }).catch((e) => {
                     reject(e)
                 })
             })
         },
-        ToggleTheme({commit}, theme) {
-            commit('TOGGLE_THEME', theme)
+        ToggleMenu({commit}, menu) {
+            if(menu){
+                commit('TOGGLE_MENU', menu);
+                document.title = menu.title;
+                router.push({
+                    name: menu.routeName
+                });
+            }
         },
         ToggleColor({commit}, color) {
             commit('TOGGLE_COLOR', color);
@@ -63,15 +74,6 @@ const app = {
         },
         ToggleMultiTab({commit}, bool) {
             commit('TOGGLE_MULTI_TAB', bool)
-        },
-        ToggleMenu({commit}, menu) {
-            if(menu){
-                commit('TOGGLE_MENU', menu);
-                document.title = 'iclear.js 深度可定制的低代码平台-'+ menu.title
-                router.push({
-                    name: menu.routeName
-                });
-            }
         },
         ToggleLang({commit}, lang) {
             return new Promise((resolve, reject) => {

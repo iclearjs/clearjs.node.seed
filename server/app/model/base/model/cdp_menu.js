@@ -27,8 +27,7 @@ module.exports = app => {
         },
         p_id: {
             name: 'p_id',
-            type: String,
-            default: '0'
+            type: String
         },
         name: {
             name: 'name',
@@ -36,18 +35,15 @@ module.exports = app => {
         },
         location: {
             name: 'location',
-            type: String,
-            default: 'Layout'
+            type: String
         },
         type: {
             name: 'type',
-            type: String,
-            default: 'M'
+            type: String
         },
         icon: {
             name: 'icon',
-            type: String,
-            default: 'folder'
+            type: String
         },
         routeName: {
             name: 'routeName',
@@ -61,19 +57,15 @@ module.exports = app => {
             name: 'resolvePath',
             type: String
         },
-        meta: {
-            name: 'meta',
-            type: String
-        },
         order: {
-            name: 'order',
+            name: '排序',
             type: Number,
-            default: '999'
+            default: 999
         },
     };
 
     const schema = app.MongooseSchema(collection, attributes, false, false, false);
 
-    return app.mongooseDB.get('default').model(collection, schema, collection);
+    return app.mongooseDB.get('default').model(collection, require('fs').existsSync(require('path').resolve(__dirname, '../middleware/' + collection + '.js')) ? require('../middleware/' + collection)(app, schema) : schema, collection);
 
 };

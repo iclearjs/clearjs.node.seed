@@ -1,12 +1,12 @@
 import config from '@/config/config.default'
 export default {
     login: '/v1/authority/login',
-    model: "/api/model",
-    modelByPost: "/api/modelByPost",
+    model: "/v1/model",
+    modelByPost: "/v1/modelByPost",
     file: {
-        preview: config.host+'/api/file/preview/',
-        download: config.host+'/api/file/download/',
-        upload: config.host+'/api/file/upload',
+        preview: config.host+'/v1/file/preview/',
+        download: config.host+'/v1/file/download/',
+        upload: config.host+'/v1/file/upload',
     },
     materielChildrenConserve:'/v1/materiel/children/conserve/',
     materielConserve:'/v1/materiel/conserve/',

@@ -21,13 +21,17 @@ export default new Vuex.Store({
 
   },
   getters:{
-    uid: state => state.app.uid,
-    theme: state => state.app.theme,
+    layout: state => state.app.layout,
+    module: state => state.app.module,
+
+    menu: state => state.app.menu,
     color: state => state.app.color,
     multiTab: state => state.app.multiTab,
     lang: state => state.app.lang,
-    menu: state => state.app.menu,
-    token: state => state.user.token,
+
     user: state => state.user.user,
+    token: state => state.user.token,
+    group: state => state.user.group,
+    organ: state => state.user.organ,
   }
 })

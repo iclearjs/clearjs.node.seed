@@ -4,10 +4,10 @@ module.exports = appInfo => {
     config.mongoose = {
         clients: {
             default: {
-                url: "mongodb://47.111.230.18/608ac68594183e3730fde680",
+                url: "mongodb://192.168.192.100/60b5ce9dfd233dc94c4bbe71",
                 options: {
-                    user: "hdjt",
-                    pass: "hdjt",
+                    user: "scm",
+                    pass: "scm",
                     useUnifiedTopology: true,
                 },
             },

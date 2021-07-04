@@ -16,8 +16,7 @@ module.exports = app => {
         },
         p_id: {
             name: '上级节点',
-            type: String,
-            default: '0'
+            type: String
         },
         field: {
             name: 'field',
@@ -41,13 +40,11 @@ module.exports = app => {
         },
         listVisible: {
             name: 'listVisible',
-            type: Boolean,
-            default: 'true'
+            type: Boolean
         },
         cardVisible: {
             name: 'cardVisible',
-            type: Boolean,
-            default: 'true'
+            type: Boolean
         },
         readonly: {
             name: 'readonly',
@@ -80,14 +77,14 @@ module.exports = app => {
             type: String
         },
         order: {
-            name: 'order',
+            name: '排序',
             type: Number,
-            default: '999'
+            default: 999
         },
     };
 
     const schema = app.MongooseSchema(collection, attributes, false, false, false);
 
-    return app.mongooseDB.get('default').model(collection, schema, collection);
+    return app.mongooseDB.get('default').model(collection, require('fs').existsSync(require('path').resolve(__dirname, '../middleware/' + collection + '.js')) ? require('../middleware/' + collection)(app, schema) : schema, collection);
 
 };

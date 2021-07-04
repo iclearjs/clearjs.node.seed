@@ -1,49 +1,53 @@
 'use strict';
 
-
-
 module.exports = app => {
-    const model = require('path').basename(__filename, '.js');
+
+    const collection = require('path').basename(__filename, '.js');
 
     const attributes = {
         name: {
+            name: 'name',
             type: String
         },
         description: {
-            type: String,
+            name: 'description',
+            type: String
         },
         billCode: {
-            type: String,
+            name: 'billCode',
+            type: String
         },
-        type:{
-            type:String,
-            enum:['overdue','overdueNotice']
+        type: {
+            name: 'type',
+            type: String
         },
-        meta:{
-            type:{}
+        idWorkflow: {
+            name: 'idWorkflow',
+            type: app.mongoose.Schema.ObjectId,
+            ref: 'wf_workflow'
         },
-        idWorkflow:{
-            type:app.mongoose.Types.ObjectId,
-            ref:'wf_workflow'
+        idWorkflowMember: {
+            name: 'idWorkflowMember',
+            type: app.mongoose.Schema.ObjectId,
+            ref: 'wf_workflow_design'
         },
-        idWorkflowMember:{
-            type:app.mongoose.Types.ObjectId,
-            ref:'wf_workflow_design'
+        idUser: {
+            name: 'idUser',
+            type: app.mongoose.Schema.ObjectId,
+            ref: 'sys_user'
         },
-        idUser:{
-            type:app.mongoose.Types.ObjectId,
-            ref:'sys_user'
+        overdueDay: {
+            name: '审批截止日期',
+            type: Date
         },
-        overdueDay:{
-            type:Date,
-            name:'审批截止日期',
+        takeEffectTime: {
+            name: 'takeEffectTime',
+            type: Date
         },
-        takeEffectTime:{
-            type:Date
-        }
     };
 
-    const schema = app.MongooseSchema(model, attributes);
+    const schema = app.MongooseSchema(collection, attributes, true, false, false);
 
-    return app.mongooseDB.get('default').model(model, schema, model);
+    return app.mongooseDB.get('default').model(collection, require('fs').existsSync(require('path').resolve(__dirname, '../middleware/' + collection + '.js')) ? require('../middleware/' + collection)(app, schema) : schema, collection);
+
 };

@@ -5,9 +5,10 @@
  */
 
 export default {
-    host:'https://oa.xiaojinsan.com',
-    uid:'5f6030c8d88db82c58cf6cbf',
+    host:'http://192.168.31.100:7002',
+    module:'5f6030c8d88db82c58cf6cbf',
     primaryColor: '#1890FF', // primary color of ant design
+    layout:'top',
     platform:'web',
     multiTab:true,
     lang:'zh-CN',

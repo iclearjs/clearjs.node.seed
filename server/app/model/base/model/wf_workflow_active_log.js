@@ -1,77 +1,70 @@
 'use strict';
 
-
 module.exports = app => {
-    const model = require('path').basename(__filename, '.js');
-    let workflowKey = {
+
+    const collection = require('path').basename(__filename, '.js');
+
+    const attributes = {
         idBill: {
-            type: app.mongoose.Types.ObjectId,
+            name: 'idBill',
+            type: app.mongoose.Schema.ObjectId
         },
         workId: {
-            type: String,
-        },
-        idPage: {
-            type: app.mongoose.Types.ObjectId,
-            ref: 'cdp_page'
-        },
-    };
-    let workflowDesignKey = {
-        id: {
+            name: 'workId',
             type: String
         },
+        idPage: {
+            name: 'idPage',
+            type: app.mongoose.Schema.ObjectId,
+            ref: 'cdp_page'
+        },
         description: {
+            name: 'description',
             type: String
         },
         source: {
+            name: 'source',
             type: String
         },
         target: {
+            name: 'target',
             type: String
         },
         label: {
+            name: 'label',
             type: String
         },
-    };
-    const attributes = {
-        ...workflowKey,
-        ...workflowDesignKey,
-        /* 流程 字段 */
-
         idWorkflowMember: {
-            type: app.mongoose.Types.ObjectId,
+            name: 'idWorkflowMember',
+            type: app.mongoose.Schema.ObjectId,
             ref: 'wf_workflow_design'
-        }, /* target source id type*/
-
-        /* 业务员操作 字段 */
+        },
         operationType: {
             name: '操作类型',
-            type: String,
-            enum: ['accept', 'reject', 'changeSig', 'counterSig', 'close', 'end', 'again'] /*通过 拒绝 改派 加签 关闭*/
+            type: String
         },
         operationAt: {
             name: '操作时间',
-            type: Date,
+            type: Date
         },
         pointSigUser: {
             name: '指派人',
-            type: app.mongoose.Types.ObjectId,
+            type: app.mongoose.Schema.ObjectId,
             ref: 'sys_user'
         },
-
-
         idUser: {
             name: '操作人',
-            type: app.mongoose.Types.ObjectId,
+            type: app.mongoose.Schema.ObjectId,
             ref: 'sys_user'
         },
         memo: {
             name: '加签或改派备注',
-            type: String,
-        }
-
+            type: String
+        },
     };
 
-    const schema = app.MongooseSchema(model, attributes);
+    const schema = app.MongooseSchema(collection, attributes, true, false, false);
 
-    return app.mongooseDB.get('default').model(model, schema, model);
+    return app.mongooseDB.get('default').model(collection, require('fs').existsSync(require('path').resolve(__dirname, '../middleware/' + collection + '.js')) ? require('../middleware/' + collection)(app, schema) : schema, collection);
+
 };

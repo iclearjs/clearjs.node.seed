@@ -30,14 +30,14 @@ module.exports = app => {
             type: Array
         },
         order: {
-            name: 'order',
+            name: '排序',
             type: Number,
-            default: '999'
+            default: 999
         },
     };
 
     const schema = app.MongooseSchema(collection, attributes, false, false, false);
 
-    return app.mongooseDB.get('default').model(collection, schema, collection);
+    return app.mongooseDB.get('default').model(collection, require('fs').existsSync(require('path').resolve(__dirname, '../middleware/' + collection + '.js')) ? require('../middleware/' + collection)(app, schema) : schema, collection);
 
 };

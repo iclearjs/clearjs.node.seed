@@ -3,8 +3,8 @@
 module.exports = {
     GeneratorQuery(data){
         const query = {};
-        query.filter = data.filter === undefined || typeof data.filter==='object'? {} : JSON.parse(data.filter);
-        query.project = data.project === undefined || typeof data.project==='object'? {} : JSON.parse(data.project);
+        query.filter = data.filter === undefined? {}: typeof data.filter==='object'?data.filter:JSON.parse(data.filter);
+        query.project = data.project === undefined ? {} : typeof data.project==='object'?data.project:JSON.parse(data.project);
         if (data.like) {
             query.filter.$or = [];
             for (const key of data.likeBy.split(',')) {

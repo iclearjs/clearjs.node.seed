@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import {BasicLayout} from '@/components/Layout'
+import Layout from '@/components/Layout'
 import NProgress from 'nprogress'
 
 const originalPush = Router.prototype.push;
@@ -19,14 +19,16 @@ const router = new Router({
             component: () => import('@/views/login')
         },
         {
-            path: '/welcome',
-            name: 'welcome',
-            component: () => import('@/views/welcome')
-        },
-        {
             path: '/404',
             name: '404',
-            component: () => import('@/views/exception/404')
+            component: {
+                template: `<a-result status="404" title="404" sub-title="抱歉，您访问的页面不存在。"><template #extra><a-button type="primary" @click="handleToHome">返回首页</a-button></template></a-result>`,
+                methods: {
+                    handleToHome () {
+                        this.$router.push({ name: 'dash' })
+                    }
+                }
+            }
         },
     ]
 });
@@ -36,30 +38,14 @@ router.loadDynamicRoutes=async (application)=>{
         return;
     }
     const routes=(await Vue.prototype.$http.get('/v1/authority/menu',{params:{application}})).data.records;
-    const dynamicRoutes = [{
-        path: '*', redirect: '/404'
-    }];
-    const layoutDynamicRoutes={
-        path: '/',
-        name: 'index',
-        component: BasicLayout,
-        redirect : () => {
-            return 'dash'
-        },
-        children: [
-            {
-                path: '/dash',
-                name: 'dash',
-                component: () => import('@/views/dash')
-            },
-        ]
-    };
+    router.getRoutes().filter(item=>item.name==='index').length<1&&router.addRoute({name: 'index', path: '/', component: Layout, redirect : () => {return 'dash'}});
+    router.getRoutes().filter(item=>item.name==='dash').length<1&& router.addRoute('index',{name: 'dash', path: '/dash', component: () => import('@/views/dash')});
     for (let route of routes) {
         if (route.routePath) {
             let meta = route.meta ? JSON.parse(route.meta) : {};
             switch (route.location) {
                 case 'Layout':
-                    layoutDynamicRoutes.children.push({
+                    router.getRoutes().filter(item=>item.name===route.routeName).length<1&& router.addRoute('index',{
                         name: route.routeName,
                         path: route.routePath,
                         component: () => import('@/'+route.resolvePath),
@@ -67,7 +53,7 @@ router.loadDynamicRoutes=async (application)=>{
                     });
                     break;
                 case'Root':
-                    dynamicRoutes.push({
+                    router.getRoutes().filter(item=>item.name===route.routeName).length<1&& router.addRoute({
                         name: route.routeName,
                         path: route.routePath,
                         component: () => import('@/'+route.resolvePath),
@@ -79,14 +65,12 @@ router.loadDynamicRoutes=async (application)=>{
             }
         }
     }
-    dynamicRoutes.push(layoutDynamicRoutes);
-    router.addRoutes(dynamicRoutes);
+    router.getRoutes().filter(item=>item.name==='other').length<1&&router.addRoute({name:'other',path: '*', redirect: '/404'});
 }
 
 router.beforeEach(async (to, from, next) => {
     NProgress.start();
     const  whitelist=['login','register']
-    console.log(Vue.prototype.$cookies?Vue.$cookies.get('ACCESS_TOKEN'):Vue.ls.get('ACCESS_TOKEN', undefined));
     if(!(Vue.prototype.$cookies?Vue.$cookies.get('ACCESS_TOKEN'):Vue.ls.get('ACCESS_TOKEN', undefined))&&whitelist.indexOf(to.name)<0){
         router.replace({name: 'login'})
     }

@@ -1,149 +1,123 @@
 'use strict';
 
-
-
 module.exports = app => {
-    const model = require('path').basename(__filename, '.js');
+
+    const collection = require('path').basename(__filename, '.js');
 
     const attributes = {
-
         idWorkflow: {
-            type: app.mongoose.Types.ObjectId,
-            ref:'wf_workflow'
-        },
-
-        /* public*/
-        id: {
-            type: String
+            name: 'idWorkflow',
+            type: app.mongoose.Schema.ObjectId,
+            ref: 'wf_workflow'
         },
         label: {
+            name: 'label',
             type: String
         },
         description: {
+            name: 'description',
             type: String
         },
-
         memberType: {
-            type: String,
-            enum:['node','edge']
-        },
-
-        nodeType: {
+            name: 'memberType',
             type: String
         },
-
-
-
-        /* node */
-
-        /* G6 属性*/
+        nodeType: {
+            name: 'nodeType',
+            type: String
+        },
         anchorPoints: {
+            name: 'anchorPoints',
             type: Array
         },
         x: {
+            name: 'x',
             type: Number
         },
         y: {
+            name: 'y',
             type: Number
         },
         type: {
+            name: 'type',
             type: String
         },
         linkPoints: {
+            name: 'linkPoints',
             type: Object
         },
-        /* 流程 属性*/
         isSendMessage: {
-            name:'是否发送系统通知',
-            type: Boolean,
-            default:false
+            name: '是否发送系统通知',
+            type: Boolean
         },
         isSendShortMessage: {
-            name:'是否发送短信通知',
-            type: Boolean,
-            default:false
+            name: '是否发送短信通知',
+            type: Boolean
         },
         isAllowCounterSig: {
-            name:'是否允许加签',
-            type: Boolean,
-            default:false
+            name: '是否允许加签',
+            type: Boolean
         },
         isAllowChangeSig: {
-            name:'是否允许改签',
-            type: Boolean,
-            default:false
+            name: '是否允许改签',
+            type: Boolean
         },
         isAllowPointSig: {
-            name:'是否允许指派',
-            type: Boolean,
-            default:false
+            name: '是否允许指派',
+            type: Boolean
         },
-        preemptType:{
-            name:'审核抢占模式',
-            type: String,
-            enum:['countersign','preempt'],
-            default:'preempt'
+        preemptType: {
+            name: '审核抢占模式',
+            type: String
         },
-        countersignValue:{
-            name:'会签阈值',
-            type: Number,
+        countersignValue: {
+            name: '会签阈值',
+            type: Number
         },
         rejectType: {
-            name:'驳回处理方式',
-            type: String,
-            enum:['stop','next'],
-            default:'stop'
+            name: '驳回处理方式',
+            type: String
         },
         mergeType: {
-            name:'合并方式',
-            type: String,
-            enum:['or','and'],
-            default:'or'
+            name: '合并方式',
+            type: String
         },
         branchType: {
-            name:'分支方式',
-            type: String,
-            enum:['or','and'],
-            default:'or'
+            name: '分支方式',
+            type: String
         },
         overdueDays: {
-            name:'逾期天数',
-            type: Number,
+            name: '逾期天数',
+            type: Number
         },
         overdueNoticeDays: {
-            name:'逾期提醒天数',
-            type: Number,
+            name: '逾期提醒天数',
+            type: Number
         },
-
-        /* edge */
-
-        /* G6 属性*/
         source: {
+            name: 'source',
             type: String
         },
         target: {
+            name: 'target',
             type: String
         },
-        /* 流程属性 */
-        condType:{
-            type:String,
-            enum:['null','cond','other','defaultError','error'],
-            default:'cond'
+        condType: {
+            name: 'condType',
+            type: String
         },
-        resultType:{
-            name:'审批结果',
-            type: String,
-            enum:['NULL','YES','NO'],
-            default:'YES'
+        resultType: {
+            name: '审批结果',
+            type: String
         },
         filter: {
             name: '条件设置',
-            type: Array,
-            default:[]
+            type: Array
         },
     };
 
-    const schema = app.MongooseSchema(model, attributes);
+    const schema = app.MongooseSchema(collection, attributes, true, false, false);
 
-    return app.mongooseDB.get('default').model(model, schema, model);
+    return app.mongooseDB.get('default').model(collection, require('fs').existsSync(require('path').resolve(__dirname, '../middleware/' + collection + '.js')) ? require('../middleware/' + collection)(app, schema) : schema, collection);
+
 };

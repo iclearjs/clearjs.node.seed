@@ -1,32 +1,31 @@
 'use strict';
 
-
-
 module.exports = app => {
-    const model = require('path').basename(__filename, '.js');
+
+    const collection = require('path').basename(__filename, '.js');
 
     const attributes = {
-        name: {
-            type: String
-        },
         idPage: {
-            type: app.mongoose.Types.ObjectId,
-            ref:'cdp_page'
+            name: '所属页面',
+            type: app.mongoose.Schema.ObjectId,
+            ref: 'cdp_page'
         },
         code: {
+            name: '流程编码',
             type: String
         },
-        idApplication: {
-            type: app.mongoose.Types.ObjectId,
-            ref:'cdp_application'
+        name: {
+            name: '流程名称',
+            type: String
         },
-        version:{
-            type:String,
-            default:'0.0.0'
+        version: {
+            name: '版本号',
+            type: String
         },
     };
 
-    const schema = app.MongooseSchema(model, attributes);
+    const schema = app.MongooseSchema(collection, attributes, true, false, false);
 
-    return app.mongooseDB.get('default').model(model, schema, model);
+    return app.mongooseDB.get('default').model(collection, require('fs').existsSync(require('path').resolve(__dirname, '../middleware/' + collection + '.js')) ? require('../middleware/' + collection)(app, schema) : schema, collection);
+
 };

@@ -15,8 +15,8 @@ module.exports = app => {
         },
     };
 
-    const schema = app.MongooseSchema(collection, attributes, true, true, false);
+    const schema = app.MongooseSchema(collection, attributes, true, false, false);
 
-    return app.mongooseDB.get('default').model(collection, schema, collection);
+    return app.mongooseDB.get('default').model(collection, require('fs').existsSync(require('path').resolve(__dirname, '../middleware/' + collection + '.js')) ? require('../middleware/' + collection)(app, schema) : schema, collection);
 
 };

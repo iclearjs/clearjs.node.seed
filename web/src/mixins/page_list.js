@@ -18,6 +18,9 @@ export default {
                 verify: (record) => {
                     return record && record.__s === 2
                 },
+                change: (record) => {
+                    return record && record.__s === 3
+                },
                 abandon: (record) => {
                     return record && record.__s === 3
                 },
@@ -261,9 +264,9 @@ export default {
             this.query.pipeline = [];
             this.query.prePipeline = [];
             this.query.limit =this.PageConfig.widgets.filter(el => el.field === 'p_id').length > 0? 500: this.query.limit;
-            switch (this.PageConfig.idEntityList.type) {
+            switch (this.PageConfig.idEntityCard.type) {
                 case 'view':
-                    this.query.pipeline = JSON.parse(this.PageConfig.idEntityList.dsConfig.pipeline);
+                    this.query.pipeline = JSON.parse(this.PageConfig.idEntityCard.dsConfig.pipeline);
                     break;
                 default:
                     break;
@@ -279,7 +282,7 @@ export default {
                     }
                 }
             }
-            const {records, count} = await this.$http.post('/api/getByAggregate/' + this.PageConfig.idEntityList.dsCollection, {
+            const {records, count} = await this.$http.post('/v1/getByAggregate/' + this.PageConfig.idEntityCard.dsCollection, {
                 ...this.query,
             }).then(res => res.data);
             this.records = records;
@@ -301,20 +304,20 @@ export default {
                     operateUser:this.user._id
                 });
             }
-
-
         },
         async doVerify(records) {
             if(records.length === 1){
                 if(records[0].idWorkflow){
                     this.$WorkFlowAction({
-                        billCode:records[0]._id,
+                        workId:records[0]._id,
                         user:this.user,
                         onOk:()=>{
-                            this.loadRecords()
+                            this.PageView === 'list' && this.setSelectNull();
+                            this.PageView === 'list' ? this.loadRecords() : this.loadRecord(this.selectedRow);
                         },
                         onCancel:()=>{
-                            this.loadRecords()
+                            this.PageView === 'list' && this.setSelectNull();
+                            this.PageView === 'list' ? this.loadRecords() : this.loadRecord(this.selectedRow);
                         },
                     });
                 }else{
@@ -366,7 +369,7 @@ export default {
         async doSwitch(records) {
             for (let record of records) {
                 let __s = record.__s === 1 ? 0 : 1;
-                await this.$clear.model(this.PageConfig.idEntityList.dsCollection).patch(record._id, {
+                await this.$clear.model(this.PageConfig.idEntityCard.dsCollection).patch(record._id, {
                     __s,
                     updatedAt: records.updatedAt,
                     updatedUser: this.user._id
@@ -377,7 +380,7 @@ export default {
         async doExport(query) {
             query = query ? query : {};
             const url = this.$http.getUri({
-                url: '/api/v1/page/export',
+                url: '/v1/page/export',
                 params: {...query, idPage: this.PageConfig._id}
             });
             window.open(url)

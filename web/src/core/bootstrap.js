@@ -3,11 +3,16 @@ import store from '@/store/'
 import config from '@/config/config.default'
 
 export default function Initializer() {
-    store.dispatch('ToggleApp', Vue.ls.get('UID',config.uid))
+    if(Vue.ls.get('MENU')){
+        store.dispatch('ToggleModule', Vue.ls.get('MENU').idApplication);
+        store.commit('TOGGLE_MENU', Vue.ls.get('MENU'))
+    }else{
+        store.dispatch('ToggleModule', Vue.ls.get('MODULE',config.module))
+    }
+    store.dispatch('ToggleLayout', Vue.ls.get('LAYOUT', config.layout))
     store.dispatch('ToggleColor', Vue.ls.get('COLOR', config.primaryColor))
     store.dispatch('ToggleLang', Vue.ls.get('LANG', config.lang))
     store.dispatch('ToggleMultiTab', Vue.ls.get('MULTI_TAB', config.multiTab))
-    store.dispatch('ToggleMenu', Vue.ls.get('MENU'), undefined)
 
     if (Vue.prototype.$electron) {
         store.commit('SET_TOKEN', Vue.ls.get('ACCESS_TOKEN', undefined))

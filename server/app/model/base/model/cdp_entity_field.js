@@ -12,8 +12,7 @@ module.exports = app => {
         },
         p_id: {
             name: '上级节点',
-            type: String,
-            default: '0'
+            type: String
         },
         name: {
             name: 'name',
@@ -44,14 +43,13 @@ module.exports = app => {
             type: Boolean
         },
         order: {
-            name: '排序号',
+            name: '排序',
             type: Number,
-            default: '999'
+            default: 999
         },
         isAutoCode: {
             name: 'isAutoCode',
-            type: Boolean,
-            default: 'false'
+            type: Boolean
         },
         enums: {
             name: '枚举值域',
@@ -61,6 +59,6 @@ module.exports = app => {
 
     const schema = app.MongooseSchema(collection, attributes, false, false, false);
 
-    return app.mongooseDB.get('default').model(collection, schema, collection);
+    return app.mongooseDB.get('default').model(collection, require('fs').existsSync(require('path').resolve(__dirname, '../middleware/' + collection + '.js')) ? require('../middleware/' + collection)(app, schema) : schema, collection);
 
 };

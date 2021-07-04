@@ -8,7 +8,7 @@ import moment from 'moment'
 import './core/lazy_use'
 import bootstrap from './core/bootstrap'
 import url from './config/config.url'
-import * as helper from './utils/helper'
+import helper from './utils/helper'
 import axios from  './utils/axios'
 import clearUIVue from '@clearui/vue'
 
@@ -17,7 +17,7 @@ Vue.use(clearUIVue,{store,i18n,axios})
 Vue.prototype.$http = axios;
 Vue.prototype.$url = url;
 Vue.prototype.$moment = moment;
-Vue.prototype.$helper = {...Vue.prototype.$helper,...helper}
+Vue.prototype.$helper = {...Vue.prototype.$helper,...helper(Vue)}
 
 Vue.config.productionTip = false;
 

@@ -12,18 +12,15 @@ module.exports = app => {
         },
         license: {
             name: 'license',
-            type: Date,
-            default: '9999-12-31'
+            type: Date
         },
         clientHost: {
             name: 'clientHost',
-            type: String,
-            default: 'https://cloud.emaiban.com'
+            type: String
         },
         serverHost: {
             name: 'serverHost',
-            type: String,
-            default: 'https://cloud.emaiban.com'
+            type: String
         },
         clientDevHost: {
             name: 'clientDevHost',
@@ -38,14 +35,14 @@ module.exports = app => {
             type: String
         },
         order: {
-            name: '排序号',
+            name: '排序',
             type: Number,
-            default: '999'
+            default: 999
         },
     };
 
     const schema = app.MongooseSchema(collection, attributes, true, true, false);
 
-    return app.mongooseDB.get('default').model(collection, schema, collection);
+    return app.mongooseDB.get('default').model(collection, require('fs').existsSync(require('path').resolve(__dirname, '../middleware/' + collection + '.js')) ? require('../middleware/' + collection)(app, schema) : schema, collection);
 
 };

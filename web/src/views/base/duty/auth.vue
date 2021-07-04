@@ -35,7 +35,7 @@ export default {
     name: "auth",
     data() {
         return {
-            icon: require('../../../assets/app.png'),
+            icon: require('../../../assets/icon/application.png'),
             currentValue: false,
             applications: [],
             application: '',

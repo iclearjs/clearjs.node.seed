@@ -31,6 +31,7 @@
 
 <script>
     import {mapActions, mapGetters} from "vuex";
+    import config from '@/config/config.default'
 
     export default {
         name: "MultiTab",
@@ -41,6 +42,7 @@
                         key: 'dash',
                         title: '首页',
                         routeName: 'dash',
+                        idApplication:config.module,
                         closable: false
                     }
                 ]

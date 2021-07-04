@@ -58,7 +58,8 @@ import {
     Comment,
     Timeline,
     Calendar,
-    PageHeader
+    PageHeader,
+    Result
 
 } from 'ant-design-vue'
 
@@ -112,6 +113,7 @@ Vue.use(Comment);
 Vue.use(Timeline);
 Vue.use(Calendar);
 Vue.use(PageHeader);
+Vue.use(Result);
 
 
 Vue.prototype.$confirm = Modal.confirm

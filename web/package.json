@@ -15,8 +15,8 @@
   "dependencies": {
     "@antv/g2": "^4.1.19",
     "bignumber.js": "^9.0.1",
-    "@clearjs/node": "0.1.7",
-    "@clearui/vue": "0.0.7",
+    "@clearjs/node": "0.1.8",
+    "@clearui/vue": "0.1.10",
     "ant-design-vue": "^1.7.5",
     "axios": "^0.18.0",
     "chromedriver": "^83.0.0",

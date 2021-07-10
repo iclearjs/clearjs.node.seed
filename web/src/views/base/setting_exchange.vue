@@ -243,7 +243,7 @@
                 switch (event) {
                     case 'modify':
                         this.modal.form = this.selectedRow;
-                        this.modal.form.organs = await this.$clear.model('org_setting_exchange').get({
+                        this.modal.form.organs = await this.$core.model('org_setting_exchange').get({
                             params: {
                                 filter: {
                                     event: this.selectedRow.event,
@@ -264,7 +264,7 @@
                         this.$confirm({
                             content: '数据删除后无法恢复，是否确认删除？',
                             onOk: async () => {
-                                await this.$clear.model('org_setting_exchange').delete(this.selectedRow._id).then(el => {
+                                await this.$core.model('org_setting_exchange').delete(this.selectedRow._id).then(el => {
                                     if (el.error.code === '0') {
                                         this.$message.success('删除成功')
                                     }
@@ -278,7 +278,7 @@
                 }
             },
             async loadApplications() {
-                this.applications = (await this.$http.get('/v1/authority/application')).data.records.map(el => el.idApplication)
+                this.applications = (await this.$http.get('/core/authority/application')).data.records.map(el => el.idApplication)
                 if (this.applications.length > 0 && !this.application) {
                     this.application = this.applications[0]._id;
                 }
@@ -290,7 +290,7 @@
                     this.list.pagination.total = 0;
                     return
                 }
-                this.pages = (await this.$clear.model('cdp_page').get({
+                this.pages = (await this.$core.model('cdp_page').get({
                     params: {
                         filter: {
                             idApplication,
@@ -302,7 +302,7 @@
             },
             async loadRecords() {
                 /*@BUG groupOrganIds*/
-                this.page.records = await this.$clear.model('org_setting_exchange').get({
+                this.page.records = await this.$core.model('org_setting_exchange').get({
                     params: {
                         filter: {
                             // idOrgan: this.idGroupOrgan,
@@ -316,10 +316,10 @@
             },
             async conserve(data) {
                 if (data._id) {
-                    const beforeUpdateRecord = await this.$clear.model('org_setting_exchange').getByID(data._id).then(el => el.records[0]);
+                    const beforeUpdateRecord = await this.$core.model('org_setting_exchange').getByID(data._id).then(el => el.records[0]);
                     if (beforeUpdateRecord) {
                         let {event, url, description, organs} = data;
-                        const updateRecords = await this.$clear.model('org_setting_exchange').get({
+                        const updateRecords = await this.$core.model('org_setting_exchange').get({
                             params: {
                                 filter: {
                                     idOrgan: {$in: organs},
@@ -330,7 +330,7 @@
                             }
                         }).then(el => el.records);
                         for (let ur of updateRecords) {
-                            await this.$clear.model('org_setting_exchange').patch(ur._id, {event, url, description});
+                            await this.$core.model('org_setting_exchange').patch(ur._id, {event, url, description});
                         }
                     }
                     this.loadRecords();
@@ -338,7 +338,7 @@
                 } else {
                     let {event, url, description, organs} = data;
                     const {_id: idPage, code, name, idApplication} = this.page.param;
-                    const haveOrgans = await this.$clear.model('org_setting_exchange').get({
+                    const haveOrgans = await this.$core.model('org_setting_exchange').get({
                         params: {
                             filter: {
                                 idOrgan: {$in: organs},
@@ -348,7 +348,7 @@
                         }
                     }).then(el => el.records.map(el => el.idOrgan));
                     organs = organs.filter(idOrgan => !haveOrgans.includes(idOrgan));
-                    await this.$clear.model('org_setting_exchange').post(organs.map(idOrgan => {
+                    await this.$core.model('org_setting_exchange').post(organs.map(idOrgan => {
                         return {idOrgan, event, url, description, idPage, code, name, idApplication}
                     }));
                     this.loadRecords();

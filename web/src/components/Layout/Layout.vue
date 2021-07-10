@@ -64,10 +64,10 @@
         methods: {
             ...mapActions(['ToggleModule','ToggleMenu']),
             async loadApplication(module){
-                this.application=await this.$clear.model('cdp_application').getByID(module).then(res=>res.records[0])
+                this.application=await this.$core.model('cdp_application').getByID(module).then(res=>res.records[0])
             },
             async loadApplications(){
-                this.applications=(await this.$http.get('/v1/authority/application')).data.records.map(item=>{item.idApplication.title=item.idApplication.name;item.idApplication.key=item.idApplication._id;item.idApplication.icon='appstore';return item.idApplication});
+                this.applications=(await this.$http.get('/core/authority/application')).data.records.map(item=>{item.idApplication.title=item.idApplication.name;item.idApplication.key=item.idApplication._id;item.idApplication.icon='appstore';return item.idApplication});
             },
             async applicationSelect(application) {
                 await this.ToggleModule(application);
@@ -75,13 +75,13 @@
                 await this.loadMenu(application)
             },
             async loadMenu(module){
-                const menusArray=(await this.$http.get('/v1/authority/menu',{params:{application:module}})).data.records.map(item=>{item.title=item.name;item.key=item._id;return item});
+                const menusArray=(await this.$http.get('/core/authority/menu',{params:{application:module}})).data.records.map(item=>{item.title=item.name;item.key=item._id;return item});
                 this.menus=this.$helper.listToTree(menusArray,0)
             },
             async menuSelect(menu) {
                 const activeMenu = this.$helper.getTreeNode(this.menus, menu.key);
                 activeMenu.keyPath = menu.keyPath;
-                activeMenu.buttons=(await this.$http.get('/v1/authority/button',{params:{menu:menu.key}})).data.record;
+                activeMenu.buttons=(await this.$http.get('/core/authority/button',{params:{menu:menu.key}})).data.record;
                 this.ToggleMenu(activeMenu);
             },
         }

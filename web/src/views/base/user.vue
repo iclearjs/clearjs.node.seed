@@ -75,7 +75,7 @@
                 this.selectedRow = {__s:0}
             },
             async changeCL(){
-                const cmPsnDoc = await this.$clear.model('cm_psnDoc').get({params:{filter:{__s:1,idPsnDoc:this.selectedRow._id}}}).then(el=>el.records[0]);
+                const cmPsnDoc = await this.$core.model('cm_psnDoc').get({params:{filter:{__s:1,idPsnDoc:this.selectedRow._id}}}).then(el=>el.records[0]);
                 if(cmPsnDoc){
                     this.eventModal.form.idCompensationCl  = cmPsnDoc.idCompensationCl
                 }
@@ -100,29 +100,29 @@
                 }
                 if(event === 'leaveWork'){
                     const {leaveDate,endPeriod} = data;
-                    await this.$clear.model('org_organ_user').patch(this.selectedRow._id,{leaveDate,__s:0});
-                    const cmPsn = await this.$clear.model('cm_psnDoc').get({params:{filter:{__s:1,idPsnDoc:this.selectedRow._id}}}).then(el=>el.records);
+                    await this.$core.model('org_organ_user').patch(this.selectedRow._id,{leaveDate,__s:0});
+                    const cmPsn = await this.$core.model('cm_psnDoc').get({params:{filter:{__s:1,idPsnDoc:this.selectedRow._id}}}).then(el=>el.records);
                     for(let cp of cmPsn){
-                        await this.$clear.model('cm_psnDoc').patch(cp._id,{__s:0,endPeriod})
+                        await this.$core.model('cm_psnDoc').patch(cp._id,{__s:0,endPeriod})
                     }
                     this.eventModal.visible = false;
                 }
                 if(event === 'entryWork'){
                     const {startPeriod,idCompensationCl} = data;
-                    await this.$clear.model('org_organ_user').patch(this.selectedRow._id,{__s:1});
-                    await this.$clear.model('cm_psnDoc').post({__s:1,startPeriod,idPsnDoc:this.selectedRow._id,idCompensationCl,idOrgan:this.idOrgan});
+                    await this.$core.model('org_organ_user').patch(this.selectedRow._id,{__s:1});
+                    await this.$core.model('cm_psnDoc').post({__s:1,startPeriod,idPsnDoc:this.selectedRow._id,idCompensationCl,idOrgan:this.idOrgan});
                     this.eventModal.visible = false;
                 }
 
                 if(event === 'changeCL'){
                     const {startPeriod,idCompensationCl} = data;
-                    await this.$clear.model('org_organ_user').patch(this.selectedRow._id,{__s:1});
+                    await this.$core.model('org_organ_user').patch(this.selectedRow._id,{__s:1});
 
-                    const cmPsn = await this.$clear.model('cm_psnDoc').get({params:{filter:{__s:1,idPsnDoc:this.selectedRow._id}}}).then(el=>el.records);
+                    const cmPsn = await this.$core.model('cm_psnDoc').get({params:{filter:{__s:1,idPsnDoc:this.selectedRow._id}}}).then(el=>el.records);
                     for(let cp of cmPsn){
-                        await this.$clear.model('cm_psnDoc').patch(cp._id,{__s:0,endPeriod:startPeriod,leaveReason:'薪酬类别变更'})
+                        await this.$core.model('cm_psnDoc').patch(cp._id,{__s:0,endPeriod:startPeriod,leaveReason:'薪酬类别变更'})
                     }
-                    await this.$clear.model('cm_psnDoc').post({__s:1,startPeriod,idPsnDoc:this.selectedRow._id,idCompensationCl,idOrgan:this.idOrgan});
+                    await this.$core.model('cm_psnDoc').post({__s:1,startPeriod,idPsnDoc:this.selectedRow._id,idCompensationCl,idOrgan:this.idOrgan});
                     this.eventModal.visible = false;
                 }
 

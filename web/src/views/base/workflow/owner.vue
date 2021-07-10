@@ -15,11 +15,8 @@
                 <a-button type="danger" size="small" @click="remove(index)">删除</a-button>
             </template>
         </a-table>
-        <a-modal title="新建/修改" v-model="form.visible"  :maskClosable="false" destroyOnClose
-                 @ok="conserve(form.model)" @cancel="resetForm">
-
-            <a-form-model ref="ownerForm" :model="form.model"  :label-col="{span:4}"
-                          :wrapper-col="{span:18}" :rules="getFormRules()">
+        <a-modal title="新建/修改" v-model="form.visible"  :maskClosable="false" destroyOnClose @ok="conserve(form.model)" @cancel="resetForm">
+            <a-form-model ref="ownerForm" :model="form.model"  :label-col="{span:4}" :wrapper-col="{span:18}" :rules="getFormRules()">
                 <a-form-model-item label="分配方式" prop="ownerType">
                     <a-select v-model="form.model.ownerType" @change="()=>{delete form.model.idOrgan;delete form.model.idDuty;delete form.model.idRole;delete form.model.idUser;}">
                         <a-select-option value="DUTY">
@@ -39,7 +36,6 @@
             </a-form-model>
         </a-modal>
     </div>
-
 </template>
 
 <script>
@@ -101,7 +97,7 @@
             async loadData(){
                 /* 加载 职责*/
                 if(this.currentValue&&this.currentValue[0]){
-                    this.table.data = await this.$http.post('/v1/workflow/design/owner/translate',{owners:this.currentValue}).then(res=>res.data.records)
+                    this.table.data = await this.$http.post('/core/workflow/design/owner/translate',{owners:this.currentValue}).then(res=>res.data.records)
                     this.table.data = this.table.data.map((record, index) => {
                         return {...record, rowKey: index}
                     });

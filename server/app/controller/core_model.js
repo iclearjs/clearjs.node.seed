@@ -13,7 +13,7 @@ class ModelCtrl extends Controller {
     /**
      * @summary 获取模型全部数据
      * @description 根据模型获取模型全部数据
-     * @router get /v1/model/{model}
+     * @router get /core/model/{model}
      * @request path string *model
      * @request query integer limit
      * @request query integer page
@@ -39,7 +39,7 @@ class ModelCtrl extends Controller {
     /**
      * @summary 获取模型单条数据
      * @description 根据模型模型单条数据
-     * @router get /v1/model/{model}/{id}
+     * @router get /core/model/{model}/{id}
      * @request path string *model
      * @request path string *id
      * @request query integer limit
@@ -67,7 +67,7 @@ class ModelCtrl extends Controller {
     /**
      * @summary 获取模型全部数据
      * @description 根据模型获取全部数据
-     * @router post /v1/getByPost/{model}
+     * @router post /core/getByPost/{model}
      * @request path string *model
      * @request body QueryParams body
      */
@@ -87,7 +87,7 @@ class ModelCtrl extends Controller {
     /**
      * @summary 保存模型数据
      * @description 保存模型数据
-     * @router post /v1/model/{model}
+     * @router post /core/model/{model}
      * @request path string *model
      */
     async post() {
@@ -98,14 +98,13 @@ class ModelCtrl extends Controller {
             error.message = 'params model is required！';
         }
         const collection=ctx.model[ctx.helper.humps.pascalize(ctx.params.model)];
-        const body=ctx.GeneratorQuery(ctx.request.body);
-        ctx.body = error.code === '0' ? {...await mongodb.doPost(collection,body)} : {error};
+        ctx.body = error.code === '0' ? {...await mongodb.doPost(collection,ctx.request.body)} : {error};
     }
 
     /**
      * @summary 更新模型数据
      * @description 根据模型主键更新单条数据
-     * @router patch /v1/model/{model}/{id}
+     * @router patch /core/model/{model}/{id}
      * @request path string *model
      * @request path string *id
      */
@@ -118,14 +117,13 @@ class ModelCtrl extends Controller {
         }
         const collection=ctx.model[ctx.helper.humps.pascalize(ctx.params.model)];
         const ids=ctx.params.id;
-        const body=ctx.GeneratorQuery(ctx.request.body);
-        ctx.body = error.code === '0' ? {...await mongodb.doUpdate(collection,ids,body)} : {error};
+        ctx.body = error.code === '0' ? {...await mongodb.doUpdate(collection,ids,ctx.request.body)} : {error};
     }
 
     /**
      * @summary 删除模型数据
      * @description 根据模型主键删除单条数据
-     * @router delete /v1/model/{model}/{id}
+     * @router delete /core/model/{model}/{id}
      * @request path string *model
      * @request path string *id
      */
@@ -145,7 +143,7 @@ class ModelCtrl extends Controller {
     /**
      * @summary 获取模型数据
      * @description 根据模型构造管道获取数据
-     * @router post /v1/getByAggregate/{model}
+     * @router post /core/getByAggregate/{model}
      * @request path string *model
      * @request body QueryParams body
      */
@@ -158,16 +156,14 @@ class ModelCtrl extends Controller {
             error.message = 'params model is required！';
         }
         const collection=ctx.model[ctx.helper.humps.pascalize(ctx.params.model)];
-        console.log(ctx.request.body);
         const body=ctx.GeneratorQuery(ctx.request.body);
-        console.log(body);
         ctx.body = error.code === '0' ? {...await mongodb.doGetByAggregate(collection,body)} : {error};
     }
 
     /**
      * @summary 解析条件
      * @description 根据模型解析条件
-     * @router post /v1/model/getResolveFilter/{entity}
+     * @router post /core/model/getResolveFilter/{entity}
      * @request path string *entity
      * @request query object filter
      */

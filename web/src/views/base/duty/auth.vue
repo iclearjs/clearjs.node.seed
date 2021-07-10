@@ -67,7 +67,7 @@ export default {
         },
     },
     async created() {
-        this.applications = (await this.$http.get('/v1/authority/application')).data.records
+        this.applications = (await this.$http.get('/core/authority/application')).data.records
     },
     methods: {
         setCurrentValue(val) {
@@ -80,11 +80,11 @@ export default {
             this.$emit('input', false)
         },
         async loadApplicationMenus() {
-            const result = (await this.$clear.model('cdp_menu').get({
+            const result = (await this.$core.model('cdp_menu').get({
                 params: {filter: {idApplication: this.application}, order: "order",}
             })).records;
             this.menus = this.$helper.listToTree(result, 0, {replaceFields: {key: '_id', value: '_id', title: 'name'}});
-            const existMenus = (await this.$clear.model('sys_duty_menu').get({
+            const existMenus = (await this.$core.model('sys_duty_menu').get({
                 params: {
                     filter: {
                         idApplication: this.application,
@@ -99,10 +99,10 @@ export default {
         },
         async onMenuSelect(value, node, extra) {
             this.selectedMenu = JSON.parse(JSON.stringify(node.node.dataRef));
-            this.buttons = (await this.$clear.model('cdp_menu_button').get({
+            this.buttons = (await this.$core.model('cdp_menu_button').get({
                 params: {filter: {idMenu: this.selectedMenu._id}, order: "order",}
             })).records;
-            const existButtons = (await this.$clear.model('sys_duty_button').get({
+            const existButtons = (await this.$core.model('sys_duty_button').get({
                 params: {
                     filter: {
                         idApplication: this.application,
@@ -114,7 +114,7 @@ export default {
             this.checkedButtons = existButtons.map(item => item.idMenuButton);
         },
         async onMenuCheck(checkedMenus) {
-            const exists = (await this.$clear.model('sys_duty_menu').get({
+            const exists = (await this.$core.model('sys_duty_menu').get({
                 params: {
                     filter: {
                         idApplication: this.application,
@@ -123,10 +123,10 @@ export default {
                 }
             })).records;
             if (exists[0]) {
-                await this.$clear.model('sys_duty_menu').delete(exists.map(item => item._id))
+                await this.$core.model('sys_duty_menu').delete(exists.map(item => item._id))
             }
             if (checkedMenus[0]) {
-                await this.$clear.model('sys_duty_menu').post(checkedMenus.map(item => {
+                await this.$core.model('sys_duty_menu').post(checkedMenus.map(item => {
                     return {
                         idDuty: this.idDuty,
                         idMenu: item,
@@ -136,7 +136,7 @@ export default {
             }
         },
         async onButtonCheck(checkedButtons) {
-            const exists = (await this.$clear.model('sys_duty_button').get({
+            const exists = (await this.$core.model('sys_duty_button').get({
                 params: {
                     filter: {
                         idApplication: this.application,
@@ -146,14 +146,14 @@ export default {
                 }
             })).records;
             if (exists[0]) {
-                await this.$clear.model('sys_duty_button').delete(exists.map(item => item._id))
+                await this.$core.model('sys_duty_button').delete(exists.map(item => item._id))
             }
             if (checkedButtons.length > 0) {
                 if (!this.checkedMenus.includes(this.selectedMenu._id)) {
                     this.checkedMenus.push(this.selectedMenu._id);
                     await this.onMenuCheck(this.checkedMenus);
                 }
-                await this.$clear.model('sys_duty_button').post(checkedButtons.map(item => {
+                await this.$core.model('sys_duty_button').post(checkedButtons.map(item => {
                     return {
                         idDuty: this.idDuty,
                         idMenu: this.selectedMenu._id,

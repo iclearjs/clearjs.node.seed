@@ -83,7 +83,7 @@ export default {
             this.$emit('input', false)
         },
         async loadData(){
-            this.roleDuty=(await this.$clear.model('sys_role_duty').get({
+            this.roleDuty=(await this.$core.model('sys_role_duty').get({
                 params: {
                     filter: {
                         idRole: this.idRole,
@@ -91,7 +91,7 @@ export default {
                     populate:'idOrgan,idDuty'
                 }
             })).records;
-            this.roleUser=(await this.$clear.model('sys_user_role').get({
+            this.roleUser=(await this.$core.model('sys_user_role').get({
                 params: {
                     filter: {
                         idRole: this.idRole,
@@ -105,9 +105,9 @@ export default {
             this.roleDuty[scope.index]['idRole'] = this.idRole;
 
             if (this.roleDuty[scope.index]._id) {
-                await this.$clear.model('sys_role_duty').put(this.roleDuty[scope.index]._id, this.roleDuty[scope.index]);
+                await this.$core.model('sys_role_duty').put(this.roleDuty[scope.index]._id, this.roleDuty[scope.index]);
             } else {
-                await this.$clear.model('sys_role_duty').post(this.roleDuty[scope.index]);
+                await this.$core.model('sys_role_duty').post(this.roleDuty[scope.index]);
             }
             await this.loadData()
         },
@@ -116,7 +116,7 @@ export default {
                 title: '提示',
                 content: this.$t('operate.notice.remove'),
                 onOk: async () => {
-                    await this.$clear.model('sys_role_duty').delete(record._id);
+                    await this.$core.model('sys_role_duty').delete(record._id);
                     await this.loadData();
                 },
                 onCancel:async ()=>{
@@ -129,9 +129,9 @@ export default {
             this.roleUser[scope.index]['idRole'] = this.idRole;
 
             if (this.roleUser[scope.index]._id) {
-                await this.$clear.model('sys_user_role').put(this.roleUser[scope.index]._id, this.roleUser[scope.index]);
+                await this.$core.model('sys_user_role').put(this.roleUser[scope.index]._id, this.roleUser[scope.index]);
             } else {
-                await this.$clear.model('sys_user_role').post(this.roleUser[scope.index]);
+                await this.$core.model('sys_user_role').post(this.roleUser[scope.index]);
             }
             await this.loadData()
         },
@@ -140,7 +140,7 @@ export default {
                 title: '提示',
                 content: this.$t('operate.notice.remove'),
                 onOk: async () => {
-                    await this.$clear.model('sys_user_role').delete(record._id);
+                    await this.$core.model('sys_user_role').delete(record._id);
                     await this.loadData();
                 },
                 onCancel:async ()=>{

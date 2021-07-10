@@ -142,7 +142,7 @@
                 });
             },
             async getUserOrgans(idUser) {
-                this.organUsers = (await this.$clear.model('org_organ_user').get({
+                this.organUsers = (await this.$core.model('org_organ_user').get({
                     params: {
                         filter: {idUser},
                         populate: 'idOrgan'

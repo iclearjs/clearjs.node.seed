@@ -9,7 +9,6 @@ class Core_file extends Controller {
     constructor(ctx) {
         super(ctx);
     }
-
     async preview() {
         const error = {
             code: '0',
@@ -38,7 +37,7 @@ class Core_file extends Controller {
                 console.info(e);
             });
         this.ctx.attachment(file.fileName);
-        this.ctx.set('Content-Type', 'application/octet-stream');
+        this.ctx.set('Content-Type', file.fileType);
         this.ctx.body = fs.readFileSync(path.join(this.ctx.app.config.fileDir, file.filePath));
     }
 
@@ -81,37 +80,6 @@ class Core_file extends Controller {
             }
         }
         const records = await this.ctx.model.SysFile.create(files)
-            .catch(e => {
-                if (e) {
-                    error.code = '700';
-                }
-                console.info(e);
-            });
-        this.ctx.body = error.code === '0' ? {
-            error,
-            records,
-        } : {
-            error,
-        };
-    }
-
-    async uploadByBase64() {
-        const error = {
-            code: '0',
-        };
-        const objectID = this.ctx.app.mongoose.Types.ObjectId();
-        if (!fs.existsSync(path.join(this.ctx.app.config.fileDir))) {
-            mkdirp(path.join(this.ctx.app.config.fileDir), err => {
-            });
-        }
-        await fs.writeFileSync(path.join(this.ctx.app.config.fileDir, objectID + '.png'), new Buffer(this.ctx.request.body.base64, 'base64'));
-        const fileStat = await fs.statSync(path.join(this.ctx.app.config.fileDir, objectID + '.png'));
-        const records = await this.ctx.model.SysFile.create({
-            fileName: objectID + '.png',
-            fileSize: fileStat.size,
-            fileType: 'image/png',
-            filePath: objectID + '.png',
-        })
             .catch(e => {
                 if (e) {
                     error.code = '700';

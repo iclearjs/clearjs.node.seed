@@ -75,7 +75,7 @@ export default {
 
         async doConserve(record) {
             if (record._id) {
-                await this.$http.post(`/v1/page/modify/${this.PageConfig._id}/${record._id}`,{
+                await this.$http.post(`/core/page/modify/${this.PageConfig._id}/${record._id}`,{
                     ...record,
                     operateUser:this.user._id
                 });
@@ -83,7 +83,7 @@ export default {
             } else {
                 record.idOrgan = this.idOrgan;
                 record.createdUser = this.user._id;
-                record = await this.$http.post(`/v1/page/create/${this.PageConfig._id}/`,{
+                record = await this.$http.post(`/core/page/create/${this.PageConfig._id}/`,{
                     ...record,
                     operateUser:this.user._id
                 }).then(el=>el.data.records);

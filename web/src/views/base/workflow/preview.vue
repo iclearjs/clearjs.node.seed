@@ -218,12 +218,12 @@
         methods: {
 
             async accept() {
-                /* /v1/workflow/accept */
+                /* /core/workflow/accept */
                 const {idUser, memo, node: source} = this.form;
                 if (!this.form.node || !this.form.idUser) {
                     this.$message.error('请先选择操作节点及路线')
                 }
-                await this.$http.post('/v1/workflow/accept', {idUser, memo, billCode: this.billCode, source});
+                await this.$http.post('/core/workflow/accept', {idUser, memo, billCode: this.billCode, source});
                 this.loadData();
             },
 
@@ -231,18 +231,18 @@
             /* 审核 驳回*/
 
             async rejectWorkflow() {
-                /* /v1/workflow/reject */
+                /* /core/workflow/reject */
                 const {idUser, memo, node: source} = this.form;
                 if (!this.form.node || !this.form.idUser) {
                     this.$message.error('请先选择操作节点及路线')
                 }
-                await this.$http.post('/v1/workflow/reject', {idUser, memo, billCode: this.billCode, source});
+                await this.$http.post('/core/workflow/reject', {idUser, memo, billCode: this.billCode, source});
                 this.loadData();
             },
 
             /* 加签  设置加签人员 */
             counterSigWorkflow() {
-                /* /v1/workflow/counterSig */
+                /* /core/workflow/counterSig */
                 const { idUser, node: source,memo} = this.form;
                 let users = ['5e77032439fb132348423bdb','5f0b13d254f6200873dff0b2'];
                 this.$confirm({
@@ -258,7 +258,7 @@
                     },
                     onOk: async () => {
                         /* 加入加签人 */
-                        await this.$http.post('/v1/workflow/counterSig',{idUser,source,memo,billCode:this.billCode,users});
+                        await this.$http.post('/core/workflow/counterSig',{idUser,source,memo,billCode:this.billCode,users});
                         this.loadData()
                     }
                 })
@@ -266,7 +266,7 @@
 
             /* 改派 */
             changeSigWorkflow() {
-                /* /v1/workflow/changeSig */
+                /* /core/workflow/changeSig */
                 const { idUser, node: source,memo} = this.form;
                 let toUser ='5f0b13d254f6200873dff0b2';
                 this.$confirm({
@@ -290,7 +290,7 @@
                     },
                     onOk: async () => {
                         /* 加入加签人 */
-                        await this.$http.post('/v1/workflow/changeSig',{idUser,toUser,source,memo,billCode:this.billCode});
+                        await this.$http.post('/core/workflow/changeSig',{idUser,toUser,source,memo,billCode:this.billCode});
                         this.loadData()
                     }
                 })
@@ -392,7 +392,7 @@
             },
 
             async ok(){
-                await this.$http.get('/v1/workflow/deleteTestWorkflowMember', {
+                await this.$http.get('/core/workflow/deleteTestWorkflowMember', {
                     params: {
                         idWorkflow: this.uid,
                         billCode:this.billCode
@@ -405,9 +405,9 @@
 
             async loadData() {
                 if (this.uid && this.billCode) {
-                    /* /v1/workflow/member */
+                    /* /core/workflow/member */
 
-                    this.data = await this.$http.get('/v1/workflow/member', {params: {billCode: this.billCode}}).then(res => res.data.record);
+                    this.data = await this.$http.get('/core/workflow/member', {params: {billCode: this.billCode}}).then(res => res.data.record);
                     /* 对数据进行缩放*/
                     this.data.nodes = this.data.nodes.map(item => {
                         delete item.x;
@@ -420,11 +420,11 @@
                         return item
                     });
 
-                    let activeData = await this.$http.get('/v1/workflow/activeMember', {params: {billCode: this.billCode}}).then(res => res.data.record);
+                    let activeData = await this.$http.get('/core/workflow/activeMember', {params: {billCode: this.billCode}}).then(res => res.data.record);
                     this.activeEdges = activeData.activeEdges;
                     this.activeNodes = activeData.activeNodes;
 
-                    this.workflowLog = await this.$http.get('/v1/workflow/log', {params: {billCode: this.billCode}}).then(res=>res.data.records);
+                    this.workflowLog = await this.$http.get('/core/workflow/log', {params: {billCode: this.billCode}}).then(res=>res.data.records);
                     if (this.graph) {
                         this.graph.changeData(this.data)
                     } else {

@@ -37,7 +37,7 @@ router.loadDynamicRoutes=async (application)=>{
     if(!(Vue.prototype.$cookies?Vue.$cookies.get('ACCESS_TOKEN'):Vue.ls.get('ACCESS_TOKEN', undefined))){
         return;
     }
-    const routes=(await Vue.prototype.$http.get('/v1/authority/menu',{params:{application}})).data.records;
+    const routes=(await Vue.prototype.$http.get('/core/authority/menu',{params:{application}})).data.records;
     router.getRoutes().filter(item=>item.name==='index').length<1&&router.addRoute({name: 'index', path: '/', component: Layout, redirect : () => {return 'dash'}});
     router.getRoutes().filter(item=>item.name==='dash').length<1&& router.addRoute('index',{name: 'dash', path: '/dash', component: () => import('@/views/dash')});
     for (let route of routes) {

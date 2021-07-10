@@ -59,7 +59,7 @@ export default {
         }
     },
     async created() {
-        await this.$clear.page.getPageConfig(this.menu.idPage).then(async (PageConfig) => {
+        await this.$core.page.getPageConfig(this.menu.idPage).then(async (PageConfig) => {
             if (PageConfig._id) {
                 this.PageConfig = PageConfig;
                 if (this.setCurrentDisabled !== void (0)) {
@@ -203,7 +203,7 @@ export default {
         },
         async loadRecord(record) {
             this.loading = true;
-            this.selectedRow = await this.$clear.model(this.PageConfig.idEntityCard.dsCollection).getByID(record._id, {params: {populate: this.query.populate}}).then(res => res.records[0]);
+            this.selectedRow = await this.$core.model(this.PageConfig.idEntityCard.dsCollection).getByID(record._id, {params: {populate: this.query.populate}}).then(res => res.records[0]);
             this.loading = false;
         },
 
@@ -211,7 +211,7 @@ export default {
             this.loading = true;
             this.query = query ? query : this.query;
             this.query.limit = this.PageConfig.widgets.filter(el => el.field === 'p_id').length > 0 ? 500 : this.query.limit;
-            let {records, count} = await this.$clear.model(this.PageConfig.idEntityCard.dsCollection).get({
+            let {records, count} = await this.$core.model(this.PageConfig.idEntityCard.dsCollection).get({
                 params: {
                     ...this.query,
                     pipeline: [],

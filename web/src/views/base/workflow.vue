@@ -89,8 +89,8 @@
                         })
                     },
                     onOk: async () => {
-                        const members = await this.$clear.model('wf_workflow_design').get({params: {filter: {idWorkflow: this.selectedRow._id}}}).then(res => res.records);
-                        await this.$http.post('/v1/workflow/design/save', {
+                        const members = await this.$core.model('wf_workflow_design').get({params: {filter: {idWorkflow: this.selectedRow._id}}}).then(res => res.records);
+                        await this.$http.post('/core/workflow/design/save', {
                             record:this.selectedRow,
                             nodes: members.filter(e => e.memberType === 'node'),
                             edges: members.filter(e => e.memberType === 'edge')
@@ -101,7 +101,7 @@
                 })
             },
             async stop() {
-                await this.$clear.model('wf_workflow').patch(this.selectedRow._id, {__s: 0});
+                await this.$core.model('wf_workflow').patch(this.selectedRow._id, {__s: 0});
                 this.setSelectNull();
                 this.loadRecords()
             },
@@ -110,20 +110,20 @@
                     title: '流程发布确认',
                     content: '流程发布后，单据将通过该流程进行审批，确认发布？',
                     onOk: async () => {
-                        await this.$http.post('/v1/workflow/design/publish/', {record:this.selectedRow});
+                        await this.$http.post('/core/workflow/design/publish/', {record:this.selectedRow});
                         this.loadRecords()
                     }
                 });
             },
             async doRemove(records) {
                 for(let record of records){
-                    const workflow = await this.$http.get('/v1/workflow/design/state/', {params: {idWorkflow: record._id}}).then(res => res.data.record);
+                    const workflow = await this.$http.get('/core/workflow/design/state/', {params: {idWorkflow: record._id}}).then(res => res.data.record);
                     if (workflow.state !== 'in' && workflow.__s !== 1) {
                         this.$confirm({
                             title: '流程删除确认',
                             content: '流程删除后，新建单据将无法调用改审批流，确认删除？',
                             onOk: async () => {
-                                await this.$http.delete('/v1/workflow/design/members/', {params: {idWorkflow: record._id}});
+                                await this.$http.delete('/core/workflow/design/members/', {params: {idWorkflow: record._id}});
                                 this.loadRecords();
                                 this.setSelectNull();
                             }

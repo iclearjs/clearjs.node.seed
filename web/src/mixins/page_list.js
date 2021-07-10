@@ -282,7 +282,7 @@ export default {
                     }
                 }
             }
-            const {records, count} = await this.$http.post('/v1/getByAggregate/' + this.PageConfig.idEntityCard.dsCollection, {
+            const {records, count} = await this.$http.post('/core/getByAggregate/' + this.PageConfig.idEntityCard.dsCollection, {
                 ...this.query,
             }).then(res => res.data);
             this.records = records;
@@ -293,14 +293,14 @@ export default {
 
         async doSubmit(records) {
             for (let record of records) {
-                await this.$http.post(`/v1/page/submit/${this.PageConfig._id}/${record._id}`,{
+                await this.$http.post(`/core/page/submit/${this.PageConfig._id}/${record._id}`,{
                     operateUser:this.user._id
                 });
             }
         },
         async doRevoke(records) {
             for (let record of records) {
-                await this.$http.post(`/v1/page/revoke/${this.PageConfig._id}/${record._id}`,{
+                await this.$http.post(`/core/page/revoke/${this.PageConfig._id}/${record._id}`,{
                     operateUser:this.user._id
                 });
             }
@@ -321,13 +321,13 @@ export default {
                         },
                     });
                 }else{
-                    await this.$http.post(`/v1/page/verify/${this.PageConfig._id}/${records[0]._id}`,{
+                    await this.$http.post(`/core/page/verify/${this.PageConfig._id}/${records[0]._id}`,{
                         operateUser:this.user._id
                     });
                 }
             }else {
                 for (let record of records) {
-                    await this.$http.post(`/v1/page/verify/${this.PageConfig._id}/${record._id}`,{
+                    await this.$http.post(`/core/page/verify/${this.PageConfig._id}/${record._id}`,{
                         operateUser:this.user._id
                     });
                 }
@@ -335,7 +335,7 @@ export default {
         },
         async doAbandon(records) {
             for (let record of records) {
-                await this.$http.post(`/v1/page/abandon/${this.PageConfig._id}/${record._id}`,{
+                await this.$http.post(`/core/page/abandon/${this.PageConfig._id}/${record._id}`,{
                     operateUser:this.user._id
                 });
             }
@@ -344,14 +344,14 @@ export default {
         },
         async doOpen(records) {
             for (let record of records) {
-                await this.$http.post(`/v1/page/open/${this.PageConfig._id}/${record._id}`,{
+                await this.$http.post(`/core/page/open/${this.PageConfig._id}/${record._id}`,{
                     operateUser:this.user._id
                 });
             }
         },
         async doClose(records) {
             for (let record of records) {
-                await this.$http.post(`/v1/page/close/${this.PageConfig._id}/${record._id}`,{
+                await this.$http.post(`/core/page/close/${this.PageConfig._id}/${record._id}`,{
                     operateUser:this.user._id
                 });
             }
@@ -360,7 +360,7 @@ export default {
         },
         async doRemove(records) {
             for (let record of records) {
-                await this.$http.post(`/v1/page/remove/${this.PageConfig._id}/${record._id}`,{
+                await this.$http.post(`/core/page/remove/${this.PageConfig._id}/${record._id}`,{
                     operateUser:this.user._id
                 });
             }
@@ -369,7 +369,7 @@ export default {
         async doSwitch(records) {
             for (let record of records) {
                 let __s = record.__s === 1 ? 0 : 1;
-                await this.$clear.model(this.PageConfig.idEntityCard.dsCollection).patch(record._id, {
+                await this.$core.model(this.PageConfig.idEntityCard.dsCollection).patch(record._id, {
                     __s,
                     updatedAt: records.updatedAt,
                     updatedUser: this.user._id
@@ -380,7 +380,7 @@ export default {
         async doExport(query) {
             query = query ? query : {};
             const url = this.$http.getUri({
-                url: '/v1/page/export',
+                url: '/core/page/export',
                 params: {...query, idPage: this.PageConfig._id}
             });
             window.open(url)

@@ -182,7 +182,7 @@ class Bill extends Controller {
         ctx.body = error.code === '0' ? {error, records} : {error};
     }
 
-    // /v1/workflow/log
+    // /core/workflow/log
     async getWorkflowLog() {
         const {ctx} = this;
         let error = {code: '0'};

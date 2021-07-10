@@ -61,9 +61,9 @@
                     <a-input-number v-model="form.data.overdueNoticeDays" style="width: 100%" :disabled="value!=='design'" placeholder="在工作项产生后，到该天数仍未处理，系统将发送催办邮件"/>
                 </a-form-item>
                 <a-form-item label="流程操作" v-if="form.data.nodeType === 'common'">
-                    <a-checkbox v-model="form.data.isAllowCounterSig" :disabled="value!=='design'">是否允许加签</a-checkbox>
-                    <a-checkbox v-model="form.data.isAllowChangeSig" :disabled="value!=='design'">是否允许改派</a-checkbox>
-                    <a-checkbox v-model="form.data.isAllowPointSig" :disabled="value!=='design' ||form.data.preemptType==='countersign'">是否允许指派</a-checkbox>
+                    <a-checkbox v-model="form.data.isAllowCounterSig" :disabled="value!=='design'">允许加签</a-checkbox>
+                    <a-checkbox v-model="form.data.isAllowChangeSig" :disabled="value!=='design'">允许改派</a-checkbox>
+                    <a-checkbox v-model="form.data.isAllowPointSig" :disabled="value!=='design' ||form.data.preemptType==='countersign'">允许指派</a-checkbox>
                 </a-form-item>
                 <a-form-item label="抢占模式">
                     <a-select v-model="form.data.preemptType" :disabled="value !=='design'" @change="(val)=>{form.data.countersignValue = val === 'countersign'? 100:50;form.data.isAllowPointSig = val !== 'countersign';}">
@@ -222,22 +222,22 @@
 
 
             async showPreWorkflow() {
-                await this.$http.get('/v1/workflow/deleteTestWorkflowMember', {
+                await this.$http.get('/core/workflow/deleteTestWorkflowMember', {
                     params: {
                         idWorkflow: this.uid,
                         billCode:this.billCode
                     }
                 });
-                await this.$http.post('/v1/workflow/enter', {idWorkflow: this.uid, billCode:this.billCode});
+                await this.$http.post('/core/workflow/enter', {idWorkflow: this.uid, billCode:this.billCode});
                 this.preVisible = true
             },
 
             async loadData() {
                 if (this.uid) {
-                    this.$clear.model('wf_workflow').getByID(this.uid).then(res => {
+                    this.$core.model('wf_workflow').getByID(this.uid).then(res => {
                         this.workflow = res.records[0]
                     });
-                    this.data = await this.$http.get('/v1/workflow/design/members', {params: {idWorkflow: this.uid}}).then(res => res.data.records);
+                    this.data = await this.$http.get('/core/workflow/design/members', {params: {idWorkflow: this.uid}}).then(res => res.data.records);
                     if (this.data.nodes.length === 0) {
                         this.data = {
                             nodes: [
@@ -734,7 +734,7 @@
                     return array.join('.')
                 }
 
-                const workflow = await this.$http.get('/v1/workflow/design/state/', {params: {idWorkflow: this.uid}}).then(res => res.data.record);
+                const workflow = await this.$http.get('/core/workflow/design/state/', {params: {idWorkflow: this.uid}}).then(res => res.data.record);
                 if (workflow.state === 'in') {
                     this.$message.info('该流程模板存在单据流转，请修改版本号后另存');
                     let version = workflow.version ? updateVersion(workflow.version) : '1.0.0';
@@ -769,10 +769,10 @@
                 if(virtual){
                     if (record) {
                         // owners
-                        await this.$http.post('/v1/workflow/design/save/', {nodes, edges, record});
+                        await this.$http.post('/core/workflow/design/save/', {nodes, edges, record});
                         this.$emit('input', 'list')
                     } else {
-                        await this.$http.post('/v1/workflow/design/members/', {nodes, edges, idWorkflow: this.uid});
+                        await this.$http.post('/core/workflow/design/members/', {nodes, edges, idWorkflow: this.uid});
                         this.loadData()
                     }
                 }

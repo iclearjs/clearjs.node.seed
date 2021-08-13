@@ -489,7 +489,7 @@ class BillService extends Service {
         let res;
         /* 判断 条件是否 满足 edge.filter*/
 
-        res = await this.ctx.model[this.ctx.service.coreHelper.humps.pascalize(pageConfig.idEntityList.code)].findOne({ $and: [ resolveFilter(edge.filter), { _id: workId }] });
+        res = await this.ctx.model[this.ctx.helper.humps.pascalize(pageConfig.idEntityList.code)].findOne({ $and: [ resolveFilter(edge.filter), { _id: workId }] });
 
         /* count */
         // switch (edge.idPage.dsType) {

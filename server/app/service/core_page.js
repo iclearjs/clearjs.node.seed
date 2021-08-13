@@ -13,14 +13,14 @@ class CorePage extends Service {
   async getPageConfig(pageIdOrCode) {
     const { ctx } = this;
     const PageConfig = await ctx.model.CdpPage.findOne(/^[a-fA-F0-9]{24}$/.test(pageIdOrCode) ? { _id: pageIdOrCode } : { code: pageIdOrCode }).populate([ 'idEntityList', 'idEntityCard', 'idApplication' ]).lean();
-    const PageModel = ctx.model[ctx.service.coreHelper.humps.pascalize(PageConfig.idEntityCard.dsCollection)];
+    const PageModel = ctx.model[ctx.helper.humps.pascalize(PageConfig.idEntityCard.dsCollection)];
     let PageMiddleware = ctx.service.corePageMiddleware;
     if (fs.existsSync(path.join(ctx.app.baseDir, 'app/service', PageConfig.idApplication.keyword, 'page/middleware', PageConfig.code + '.js'))) {
-      PageMiddleware = ctx.service[ctx.service.coreHelper.humps.camelize(PageConfig.idApplication.keyword)].page.middleware[ctx.service.coreHelper.humps.camelize(PageConfig.code)];
+      PageMiddleware = ctx.service[ctx.helper.humps.camelize(PageConfig.idApplication.keyword)].page.middleware[ctx.helper.humps.camelize(PageConfig.code)];
     }
     let PageExchange = ctx.service.corePageExchange;
     if (fs.existsSync(path.join(ctx.app.baseDir, 'app/service', PageConfig.idApplication.keyword, 'exchange', PageConfig.idEntityCard.dsCollection + '.js'))) {
-      PageExchange = ctx.service[PageConfig.idApplication.keyword].page.exchange[ctx.service.coreHelper.humps.camelize(PageConfig.code)];
+      PageExchange = ctx.service[PageConfig.idApplication.keyword].page.exchange[ctx.helper.humps.camelize(PageConfig.code)];
     }
     console.log('PageConfig.code',PageConfig.code)
     return { PageConfig, PageModel, PageMiddleware, PageExchange };
@@ -113,7 +113,7 @@ class CorePage extends Service {
       mode: 'listCard',
       readonly: false,
     }).sort({ order: 1 }).populate([ 'idEnum' ]);
-    const PageModel = ctx.model[ctx.service.coreHelper.humps.pascalize(pageConfig.idEntityList.dsCollection)];
+    const PageModel = ctx.model[ctx.helper.humps.pascalize(pageConfig.idEntityList.dsCollection)];
     const FileData = xlsx.parse(file)[0].data;
     const rowNameFile = FileData[0].map(name => {
       return fields.filter(el => el.name === name).length > 0 ? fields.filter(el => el.name === name)[0] : {};
@@ -121,7 +121,7 @@ class CorePage extends Service {
     const translateRefField = async (idRefer, { key = null, values = [], idOrgan = '' }) => {
       const filter = { key: { $in: values }, ...idOrgan ? { idOrgan } : {} };
       const PageConfig = await ctx.model.CdpPage.findOne({ _id: idRefer }).lean();
-      const PageModel = ctx.model[ctx.service.coreHelper.humps.pascalize(PageConfig.idEntityList.dsCollection)];
+      const PageModel = ctx.model[ctx.helper.humps.pascalize(PageConfig.idEntityList.dsCollection)];
       return await PageModel.find(filter).lean().then(el => {
         if (el.length > 0) {
           return el.reduce((mapId, item) => {

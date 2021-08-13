@@ -674,7 +674,7 @@ class CoreHelper extends Service {
       totalMoney: bigNumberSum(bill[model], 'money'),
       totalMoneyTax: bigNumberSum(bill[model], 'moneyTax'),
       ...attach.reduce((sum, key) => {
-        return { ...sum, [this.ctx.service.coreHelper.humps.camelize('total_' + attach)]: bigNumberSum(bill[model], key) };
+        return { ...sum, [this.ctx.helper.humps.camelize('total_' + attach)]: bigNumberSum(bill[model], key) };
       }, {}),
 
     };

@@ -31,7 +31,7 @@ class CoreModelCtrl extends Controller {
       error.code = '999';
       error.message = 'params model is required！';
     }
-    const collection = ctx.model[ctx.service.coreHelper.humps.pascalize(ctx.params.model)];
+    const collection = ctx.model[ctx.helper.humps.pascalize(ctx.params.model)];
     const query = ctx.GeneratorQuery(ctx.request.query);
     ctx.body = error.code === '0' ? { ...await mongodb.doGet(collection, query) } : { error };
   }
@@ -58,7 +58,7 @@ class CoreModelCtrl extends Controller {
       error.code = '999';
       error.message = 'params model is required！';
     }
-    const collection = ctx.model[ctx.service.coreHelper.humps.pascalize(ctx.params.model)];
+    const collection = ctx.model[ctx.helper.humps.pascalize(ctx.params.model)];
     const ids = ctx.params.id;
     const query = ctx.GeneratorQuery(ctx.request.query);
     ctx.body = error.code === '0' ? { ...await mongodb.doGetById(collection, ids, query) } : { error };
@@ -79,7 +79,7 @@ class CoreModelCtrl extends Controller {
       error.code = '999';
       error.message = 'params model is required！';
     }
-    const collection = ctx.model[ctx.service.coreHelper.humps.pascalize(ctx.params.model)];
+    const collection = ctx.model[ctx.helper.humps.pascalize(ctx.params.model)];
     const query = ctx.GeneratorQuery(ctx.request.body);
     ctx.body = error.code === '0' ? { ...await mongodb.doGet(collection, query) } : { error };
   }
@@ -97,7 +97,7 @@ class CoreModelCtrl extends Controller {
       error.code = '999';
       error.message = 'params model is required！';
     }
-    const collection = ctx.model[ctx.service.coreHelper.humps.pascalize(ctx.params.model)];
+    const collection = ctx.model[ctx.helper.humps.pascalize(ctx.params.model)];
     ctx.body = error.code === '0' ? { ...await mongodb.doPost(collection, ctx.request.body) } : { error };
   }
 
@@ -115,7 +115,7 @@ class CoreModelCtrl extends Controller {
       error.code = '999';
       error.message = 'params model is required！';
     }
-    const collection = ctx.model[ctx.service.coreHelper.humps.pascalize(ctx.params.model)];
+    const collection = ctx.model[ctx.helper.humps.pascalize(ctx.params.model)];
     const ids = ctx.params.id;
     ctx.body = error.code === '0' ? { ...await mongodb.doUpdate(collection, ids, ctx.request.body) } : { error };
   }
@@ -135,7 +135,7 @@ class CoreModelCtrl extends Controller {
       error.code = '999';
       error.message = 'params model is required！';
     }
-    const collection = ctx.model[ctx.service.coreHelper.humps.pascalize(ctx.params.model)];
+    const collection = ctx.model[ctx.helper.humps.pascalize(ctx.params.model)];
     const ids = ctx.params.id;
     ctx.body = error.code === '0' ? { ...await mongodb.doDestroy(collection, ids) } : { error };
   }
@@ -155,7 +155,7 @@ class CoreModelCtrl extends Controller {
       error.code = '999';
       error.message = 'params model is required！';
     }
-    const collection = ctx.model[ctx.service.coreHelper.humps.pascalize(ctx.params.model)];
+    const collection = ctx.model[ctx.helper.humps.pascalize(ctx.params.model)];
     const body = ctx.GeneratorQuery(ctx.request.body);
     ctx.body = error.code === '0' ? { ...await mongodb.doGetByAggregate(collection, body) } : { error };
   }

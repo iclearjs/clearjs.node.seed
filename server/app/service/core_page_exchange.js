@@ -46,7 +46,7 @@ class CorePageExchange extends Service {
     const { PageModel } = await this.ctx.service.corePage.getPageConfig(idPage);
     const record = await PageModel.findOne({ _id: idData });
     if (SettingExchanges && SettingExchanges.length > 0) {
-      const ExchangeRecord = await this['translate' + this.ctx.service.coreHelper.humps.pascalize(event) + 'Data'](record);
+      const ExchangeRecord = await this['translate' + this.ctx.helper.humps.pascalize(event) + 'Data'](record);
       for (const SettingExchange of SettingExchanges) {
         if (SettingExchange.url) {
           this.http.post(SettingExchange.url, { config: SettingExchange, data: ExchangeRecord }).catch(e => {

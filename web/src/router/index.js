@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Layout from '@/components/Layout'
+import CLayout from '@/components/CLayout'
 import NProgress from 'nprogress'
 
 const originalPush = Router.prototype.push;
@@ -38,7 +38,7 @@ router.loadDynamicRoutes=async (application)=>{
         return;
     }
     const routes=(await Vue.prototype.$http.get('/core/authority/menu',{params:{application}})).data.records;
-    router.getRoutes().filter(item=>item.name==='index').length<1&&router.addRoute({name: 'index', path: '/', component: Layout, redirect : () => {return 'dash'}});
+    router.getRoutes().filter(item=>item.name==='index').length<1&&router.addRoute({name: 'index', path: '/', component: CLayout, redirect : () => {return 'dash'}});
     router.getRoutes().filter(item=>item.name==='dash').length<1&& router.addRoute('index',{name: 'dash', path: '/dash', component: () => import('@/views/dash')});
     for (let route of routes) {
         if (route.routePath) {

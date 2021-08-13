@@ -11,7 +11,7 @@
         <a-layout>
             <a-layout-header style="background: #fff; padding: 0;" v-if="layout==='left'">
                 <a-page-header :title="application.name" :sub-title="application.description" @backIcon="false" style="float: left"/>
-                <layout-header></layout-header>
+                <c-layout-header></c-layout-header>
             </a-layout-header>
             <a-layout>
                 <a-layout-sider theme="light" v-model="collapsed"  collapsible>
@@ -33,12 +33,12 @@
 
 <script>
     import Menu from "@/components/Menu"
-    import LayoutHeader from "@/components/LayoutHeader";
+    import CLayoutHeader from "@/components/CLayoutHeader";
     import MultiTab from "@/components/MultiTab";
     import {mapGetters, mapActions} from 'vuex'
     export default {
         name: "basic",
-        components: {MultiTab, LayoutHeader, Menu},
+        components: {MultiTab, CLayoutHeader, Menu},
         data() {
             return {
                 collapsed: false,

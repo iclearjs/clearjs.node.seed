@@ -47,7 +47,7 @@ export default {
           idApplication: config.module,
           controlType: 'Group',
           organs: [],
-          idOrgan: '',
+          idOrgan: this.group,
           closable: false
         }
       ]
@@ -86,7 +86,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(["menu"]),
+    ...mapGetters(["menu","group"]),
     organ({menu}){
       return menu.idOrgan
     }

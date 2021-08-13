@@ -37,6 +37,7 @@ export default {
             },
             PageView: 'list',
             PageEvent: '',
+            idPage:'',
         }
     },
     computed: {
@@ -71,13 +72,12 @@ export default {
         },
         async idOrgan() {
             await this.setDefaultFilter()
-            this.loadRecords()
+            this.idPage===this.menu.idPage&&this.loadRecords()
         },
-
     },
     async created() {
+        this.idPage=this.menu.idPage;
         await this.$core.page.getPageConfig(this.menu.idPage).then(async (PageConfig) => {
-
             if (PageConfig._id) {
                 this.PageConfig = PageConfig;
                 if (this.setCurrentDisabled !== void (0)) {
@@ -100,7 +100,6 @@ export default {
         this.enterSelectedRecord()
     },
     methods: {
-
         async enterSelectedRecord() {
             if (this.$route.query._id) {
                 await this.loadRecord({_id: this.$route.query._id});

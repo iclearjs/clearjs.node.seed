@@ -63,7 +63,7 @@
                         <a @click="organModal.visible = true" style="color: #000000;">
                             <div style="text-align: center">
                                 <a-row style="margin-bottom: 24px">
-                                    <a-avatar shape="square" :size="80" icon="qiyegongsi" style="background-color:#ed4014"/>
+                                    <a-avatar shape="square" :size="80" icon="team" style="background-color:#1890FF"/>
                                 </a-row>
                                 <a-row>创建组织</a-row>
                             </div>

@@ -4,7 +4,7 @@ const Service = require('egg').Service;
 const fs = require('fs');
 const path = require('path');
 const xlsx = require('node-xlsx');
-
+const moment = require('moment');
 class CorePage extends Service {
   constructor(ctx) {
     super(ctx);
@@ -13,19 +13,20 @@ class CorePage extends Service {
   async getPageConfig(pageIdOrCode) {
     const { ctx } = this;
     const PageConfig = await ctx.model.CdpPage.findOne(/^[a-fA-F0-9]{24}$/.test(pageIdOrCode) ? { _id: pageIdOrCode } : { code: pageIdOrCode }).populate([ 'idEntityList', 'idEntityCard', 'idApplication' ]).lean();
-    const PageModel = ctx.model[ctx.helper.humps.pascalize(PageConfig.idEntityCard.dsCollection)];
+    const PageModel = ctx.model[ctx.service.coreHelper.humps.pascalize(PageConfig.idEntityCard.dsCollection)];
     let PageMiddleware = ctx.service.corePageMiddleware;
-    if (fs.existsSync(path.join(ctx.app.baseDir, 'app/service', PageConfig.idApplication.keyword, 'middleware', PageConfig.idEntityCard.dsCollection + '.js'))) {
-      PageMiddleware = ctx.service[PageConfig.idApplication.keyword].page.middleware[ctx.helper.humps.camelize(PageConfig.code)];
+    if (fs.existsSync(path.join(ctx.app.baseDir, 'app/service', PageConfig.idApplication.keyword, 'page/middleware', PageConfig.code + '.js'))) {
+      PageMiddleware = ctx.service[ctx.service.coreHelper.humps.camelize(PageConfig.idApplication.keyword)].page.middleware[ctx.service.coreHelper.humps.camelize(PageConfig.code)];
     }
     let PageExchange = ctx.service.corePageExchange;
     if (fs.existsSync(path.join(ctx.app.baseDir, 'app/service', PageConfig.idApplication.keyword, 'exchange', PageConfig.idEntityCard.dsCollection + '.js'))) {
-      PageExchange = ctx.service[PageConfig.idApplication.keyword].page.exchange[ctx.helper.humps.camelize(PageConfig.code)];
+      PageExchange = ctx.service[PageConfig.idApplication.keyword].page.exchange[ctx.service.coreHelper.humps.camelize(PageConfig.code)];
     }
+    console.log('PageConfig.code',PageConfig.code)
     return { PageConfig, PageModel, PageMiddleware, PageExchange };
   }
 
-  async doExport(fields, records) {
+  doExport(fields, records) {
     let excelRecords = [];
     const $project = {};
     const fieldsNameArray = [];
@@ -39,11 +40,9 @@ class CorePage extends Service {
       for (const key in $project) {
         function getValue(record, { field, widget, idEnum, referDisplay }) {
           let res;
-
           function getSelectOptionName(array, code) {
             return array && Array.isArray(array) && array.filter(el => el.code === code || el.code === code.toString())[0] ? array.filter(el => el.code === code || el.code === code.toString())[0].name : code;
           }
-
           switch (widget) {
             case 'Checkbox':
               try {
@@ -81,7 +80,7 @@ class CorePage extends Service {
               break;
             case 'CheckboxRefer':
               try {
-                res = eval('record.' + field).map(el => el.idObject[referDisplay]).join(',');
+                res = eval('record.' + field.replace('.' + referDisplay,'')).map(el => el.idObject[referDisplay]).join(',');
               } catch (e) {
                 res = '';
               }
@@ -96,11 +95,11 @@ class CorePage extends Service {
           }
           return res;
         }
-
         recordDataArray.push(getValue(record, $project[key]));
       }
       excelRecords.push(recordDataArray);
     }
+    console.log('excelRecords',excelRecords)
     return xlsx.build([{ name: 'sheet1', data: excelRecords }]);
   }
 
@@ -114,7 +113,7 @@ class CorePage extends Service {
       mode: 'listCard',
       readonly: false,
     }).sort({ order: 1 }).populate([ 'idEnum' ]);
-    const PageModel = ctx.model[ctx.helper.humps.pascalize(pageConfig.idEntityList.dsCollection)];
+    const PageModel = ctx.model[ctx.service.coreHelper.humps.pascalize(pageConfig.idEntityList.dsCollection)];
     const FileData = xlsx.parse(file)[0].data;
     const rowNameFile = FileData[0].map(name => {
       return fields.filter(el => el.name === name).length > 0 ? fields.filter(el => el.name === name)[0] : {};
@@ -122,7 +121,7 @@ class CorePage extends Service {
     const translateRefField = async (idRefer, { key = null, values = [], idOrgan = '' }) => {
       const filter = { key: { $in: values }, ...idOrgan ? { idOrgan } : {} };
       const PageConfig = await ctx.model.CdpPage.findOne({ _id: idRefer }).lean();
-      const PageModel = ctx.model[ctx.helper.humps.pascalize(PageConfig.idEntityList.dsCollection)];
+      const PageModel = ctx.model[ctx.service.coreHelper.humps.pascalize(PageConfig.idEntityList.dsCollection)];
       return await PageModel.find(filter).lean().then(el => {
         if (el.length > 0) {
           return el.reduce((mapId, item) => {
@@ -184,7 +183,7 @@ class CorePage extends Service {
       error.code === '0' && (records = await PageModel.create(ResBeforeMid.data).catch(e => {
         if (e) {
           error.code = e.code;
-          error.message = '单据创建失败，请重试！';
+          error.message = '单据创建失败，请重试！' + e.message;
         }
         console.info(e);
       }));
@@ -246,7 +245,6 @@ class CorePage extends Service {
     if (error.code === '0') {
       const { PageConfig, PageModel, PageMiddleware, PageExchange } = await this.getPageConfig(pageIdOrCode);
       PageData = await PageModel.findOne({ _id: data._id }).lean();
-      console.log(PageData);
       if (!PageData) {
         error.code = '900';
         error.message = '当前数据不存在，请刷新数据后重试！';
@@ -351,10 +349,7 @@ class CorePage extends Service {
       if (ResAfterMid.code === '0') {
         await PageExchange.exchange(PageConfig._id, PageData.idOrgan, PageData._id, 'REMOVE');
       }
-      // 进行消息推送
-      if (PageData && PageData.createdUser && ResAfterMid.code === '0') {
-        await this.ctx.service.coreEvent.push('REMOVE', PageData, {});
-      }
+
       /* 重新获取数据 保证数据最新（后置操作更新信息） */
       if (error.code === '0') {
         records = PageData;
@@ -473,10 +468,12 @@ class CorePage extends Service {
             error.message = '单据进入审批流失败，请刷新数据后重试！';
           }
         } else {
+          console.log('workflowActive SUBMIT',operateUser)
           /** @pushMessage SUBMIT  提交通知有审批权限的人员  */
           const sendTo = await this.service.coreHelper.getPageAuthUsers(PageConfig._id, 'verify', { idOrgan: PageData.idOrgan });
           await this.ctx.service.coreEvent.push('SUBMIT', {
             ...PageData,
+            operateUser,
             page: PageConfig,
           }, {}, sendTo);
         }
@@ -514,11 +511,13 @@ class CorePage extends Service {
       if (ResAfterMid.code === '0') {
         await PageExchange.exchange(PageConfig._id, PageData.idOrgan, PageData._id, 'SUBMIT');
       }
-      // 进行消息推送
+
       if (PageData && PageData.createdUser && ResAfterMid.code === '0') {
-        await this.ctx.service.coreEvent.push('SUBMIT', PageData, {});
+        const sendTo = await this.service.coreHelper.getPageAuthUsers(PageConfig._id, 'verify', { idOrgan: PageData.idOrgan });
+        await this.ctx.service.coreEvent.push('SUBMIT', {...PageData, operateUser,
+          page: PageConfig,}, {},sendTo);
       }
-      /* 重新获取数据 保证数据最新（后置操作更新信息） */
+      /** 重新获取数据 保证数据最新（后置操作更新信息） */
       if (error.code === '0') {
         records = await PageModel.findOne({ _id: PageData._id });
       }
@@ -593,6 +592,7 @@ class CorePage extends Service {
       const sendTo = await this.service.coreHelper.getPageAuthUsers(PageConfig._id, 'verify', { idOrgan: PageData.idOrgan });
       await this.ctx.service.coreEvent.push('REVOKE', {
         ...PageData,
+        operateUser,
         page: PageConfig,
       }, {}, sendTo);
 
@@ -675,9 +675,10 @@ class CorePage extends Service {
           }
         } else {
           if (PageData && PageData.createdUser) {
-            /** @pushMessage SUBMIT  提交通知有审批权限的人员  */
+            /** @pushMessage VERIFY  提交通知有创建人员  */
             await this.ctx.service.coreEvent.push('VERIFY', {
               ...PageData,
+              operateUser,
               page: PageConfig,
             }, {}, PageData.createdUser);
           }
@@ -746,6 +747,7 @@ class CorePage extends Service {
             /** @pushMessage ABANDON  提交通知有审批权限的人员  */
             await this.ctx.service.coreEvent.push('ABANDON', {
               ...PageData,
+              operateUser,
               page: PageConfig,
             }, {}, PageData.createdUser);
           }
@@ -755,6 +757,7 @@ class CorePage extends Service {
           /** @pushMessage ABANDON  提交通知有审批权限的人员  */
           await this.ctx.service.coreEvent.push('ABANDON', {
             ...PageData,
+            operateUser,
             page: PageConfig,
           }, {}, PageData.createdUser);
         }

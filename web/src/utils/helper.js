@@ -9,7 +9,7 @@ export default (Vue)=>{
             }).then(res => res.records[0]);
             if (organ) {
                 const groupOrgans = await Vue.prototype.$core.model('org_organ').get({ params: {filter: {idOrgan: organ.idGroupOrgan}}}).then(res => res.records);
-                return {$or: [{idOrgan: {$in: Vue.prototype.$helper.getTreeParentNode(groupOrgans, organ.p_id).split(',').filter(el => el !== ''&&el !== '0')}, isShare: true},{idOrgan: organ._id}]};
+                return {$or: [{idOrgan: {$in: Vue.prototype.$core.helper.getTreeParentNode(groupOrgans, organ.p_id).split(',').filter(el => el !== ''&&el !== '0')}, isShare: true},{idOrgan: organ._id}]};
             }else{
                 throw Error(`func getPageShareFilter params organ:${organ} is not find from database`)
             }

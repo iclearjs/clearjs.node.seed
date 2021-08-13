@@ -115,11 +115,19 @@ Vue.use(Calendar);
 Vue.use(PageHeader);
 Vue.use(Result);
 
-
-Vue.prototype.$confirm = Modal.confirm
 Vue.prototype.$message = message
+Vue.prototype.$confirm = Modal.confirm
 Vue.prototype.$info = Modal.info
 Vue.prototype.$success = Modal.success
 Vue.prototype.$error = Modal.error
 Vue.prototype.$warning = Modal.warning
 Vue.prototype.$notification = notification
+
+const CIcon = Icon.createFromIconfontCN({
+    scriptUrl: 'https://at.alicdn.com/t/font_950760_30p8pd1te0k.js', // 在 iconfont.cn 上生成
+});
+
+Vue.component('c-icon',CIcon)
+
+
+

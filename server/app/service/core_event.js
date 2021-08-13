@@ -1,7 +1,7 @@
 'use strict';
-const APPROVAL_EVENT_DISPLAY = {SUBMIT: '提交', REVOKE: '撤回', VERIFY: '审核', ABANDON: '弃审',};
-const WORKFLOW_EVENT_DISPLAY = {WORKFLOW_WAIT: '待审批', WORKFLOW_OVERDUE: '逾期提醒', WORKFLOW_END: '审核完成',};
-const EXCHANGE_EVENT_DISPLAY = {EXCHANGE_01: '交换失败', EXCHANGE_02: '交换成功',};
+const APPROVAL_EVENT_DISPLAY = { SUBMIT: '提交', REVOKE: '撤回', VERIFY: '审核', ABANDON: '弃审' };
+const WORKFLOW_EVENT_DISPLAY = { WORKFLOW_WAIT: '待审批', WORKFLOW_OVERDUE: '逾期提醒', WORKFLOW_END: '审核完成' };
+const EXCHANGE_EVENT_DISPLAY = { EXCHANGE_01: '交换失败', EXCHANGE_02: '交换成功' };
 
 
 const Service = require('egg').Service;
@@ -24,21 +24,23 @@ class CoreEvent extends Service {
       error.code = 'PS01';
       error.message = 'param data missing';
     }
-
+    console.log('event push',event)
     const EventConfig = await this.ctx.model.CdpEvent.findOne({ code: event }).populate([ 'idEntity' ]).lean();
     const users = Array.isArray(sendTo) ? sendTo : [ sendTo ];
-    let record = {};
+    let record = { meta: {} };
 
     /** 获取数据信息 */
     if (Object.keys(APPROVAL_EVENT_DISPLAY).includes(event)) {
-      record.meta.operateUserName = data.operateUserName;
-      record.meta.createdUserName = data.createdUserName;
+      const sysUser = await this.ctx.model.SysUser.findOne({_id:data.operateUser}).lean()
+      record.meta.operateUserName = sysUser?sysUser.userName:data.operateUser;
       record.title = data.name;
       record.meta.billCode = data.billCode;
       record.meta.idPage = data._id;
       record.meta._id = data._id;
       record.meta.idMenu = data.idMenu;
-      record.content = `${data.operateUserName}${APPROVAL_EVENT_DISPLAY[event]}了${data.createdUserName}发起的${data.page ? data.page.name : ''}[${data.billCode}]`;
+      console.log(event,data.operateUser,record.meta.operateUserName)
+
+      record.content = `${record.meta.operateUserName}${APPROVAL_EVENT_DISPLAY[event]}了${data.page ? data.page.name : ''}[${data.billCode}]`;
 
     } else if (Object.keys(WORKFLOW_EVENT_DISPLAY).includes(event)) {
       record.title = data.page.name;
@@ -92,20 +94,21 @@ class CoreEvent extends Service {
         idMenu: EventConfig.idMenu,
         meta: { _id: data._id },
       };
-      for (const row of EventConfig.records) {
-        record.meta[row.param] = eval(`${row.source ? 'data' : 'mate'}.${row.field}`);
+      for (const row of EventConfig.params) {
+        row.param = /\$\{(.*)\}/g.exec(row.param)[1]
+        record.meta[row.param] = eval(`${row.source ? 'data' : 'meta'}.${row.field}`);
       }
       record.content = (function(template, fields, meta) {
         for (const field of fields) {
-          template = template.replace(new RegExp('\\$\\{' + field.param + '\\}', 'g'), `meta.${field.param}`);
+          template = template.replace(new RegExp('\\$\\{' + field.param + '\\}', 'g'), meta[field.param]);
         }
-        return eval(template);
-      })(EventConfig.template, EventConfig.template.records, record.meta);
+        return template;
+      })(EventConfig.template, EventConfig.params, record.meta);
     }
 
 
     /** 判断是否进行短信推送 */
-    if (data.idOrgan) {
+    if (data.idOrgan && EventConfig && EventConfig._id) {
       const msgSetting = await ctx.model.OrgSettingSms.findOne({
         idEvent: EventConfig._id,
         idOrgan: data.idOrgan,
@@ -116,10 +119,10 @@ class CoreEvent extends Service {
       }
     }
     /** 消息推送 */
-    if (data.users.length > 0) {
+    if (users.length > 0) {
 
       const MsgMessageData = users.map(e => {
-        return { ...record, idUser: e };
+        return {...record, idUser: e};
       });
 
       const records = await ctx.model.LogMessage.create(MsgMessageData);

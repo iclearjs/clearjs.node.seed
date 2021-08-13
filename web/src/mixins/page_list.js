@@ -25,10 +25,10 @@ export default {
                     return record && record.__s === 3
                 },
                 close: (record) => {
-                    return record && record.__s === 3
+                    return record && record.__s === 3 && record.__c !== 0
                 },
                 open: (record) => {
-                    return record && record.__s === 0
+                    return record && record.__s === 3 && record.__c === 0
                 },
                 remove: (record) => {
                     return record && record.__s === 1
@@ -45,6 +45,30 @@ export default {
             this.PageView === 'list' && this.setSelectNull();
             this.PageView === 'list' ? this.loadRecords() : this.loadRecord(this.selectedRow);
         },
+
+        async copy() {
+            await this.doCopy(this.selectedRow)
+            this.PageView = 'editing';
+        },
+
+        doCopy(selectedRow){
+            let record = JSON.parse(JSON.stringify(selectedRow));
+            delete record._id;
+            delete record.__s;
+            delete record.billCode;
+            delete record.idWorkflow;
+            delete record.createdAt;
+            delete record.createdUser;
+            delete record.submitAt;
+            delete record.submitUser;
+            delete record.verifyUser;
+            delete record.verifyAt;
+            record.records && Array.isArray(record.records)&&record.records.forEach(item => {
+                delete item._id;
+            });
+            this.selectedRow = record;
+        },
+
         //撤回
         async revoke() {
             await this.doRevoke([this.selectedRow]);
@@ -380,7 +404,7 @@ export default {
         async doExport(query) {
             query = query ? query : {};
             const url = this.$http.getUri({
-                url: '/core/page/export',
+                url: this.$url.coreExport + this.PageConfig._id,
                 params: {...query, idPage: this.PageConfig._id}
             });
             window.open(url)

@@ -52,7 +52,7 @@
             </a-form-model>
             <a-tabs type="card" default-active-key="tabMemo" style="margin-top: 12px">
                 <div slot="tabBarExtraContent">
-                    <c-button-group style="margin-bottom: 6px" :buttons="menu.buttons.default" @click="click"
+                    <c-button-group style="margin-bottom: 6px" :buttons="menu.buttons?menu.buttons.default:[]" @click="click"
                                     :buttonsDisabled="buttonsDisabled" :record="selectedRow">
                     </c-button-group>
                 </div>

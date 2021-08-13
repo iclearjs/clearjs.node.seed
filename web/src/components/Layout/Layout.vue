@@ -15,7 +15,7 @@
             </a-layout-header>
             <a-layout>
                 <a-layout-sider theme="light" v-model="collapsed"  collapsible>
-                    <Menu theme="light" mode="inline" :menus="menus" :inlineCollapsed="collapsed" @menuSelect="menuSelect" :selectedKeys="[menu.key]" :openKeys.sync="menu.keyPath"></Menu>
+                    <Menu theme="light" mode="inline" :menus="menus" :inlineCollapsed="collapsed" @menuSelect="(selected)=>{selected.key!==menu.key &&menuSelect(selected)}" :selectedKeys="[menu.key]" :openKeys.sync="menu.keyPath"></Menu>
                 </a-layout-sider>
                 <a-layout>
                     <multi-tab v-if="multiTab" :style="{ margin: '2px 12px' }"></multi-tab>
@@ -76,12 +76,14 @@
             },
             async loadMenu(module){
                 const menusArray=(await this.$http.get('/core/authority/menu',{params:{application:module}})).data.records.map(item=>{item.title=item.name;item.key=item._id;return item});
-                this.menus=this.$helper.listToTree(menusArray,0)
+                this.menus=this.$core.helper.listToTree(menusArray,0)
             },
             async menuSelect(menu) {
-                const activeMenu = this.$helper.getTreeNode(this.menus, menu.key);
+
+                const activeMenu = this.$core.helper.getTreeNode(this.menus, menu.key);
                 activeMenu.keyPath = menu.keyPath;
                 activeMenu.buttons=(await this.$http.get('/core/authority/button',{params:{menu:menu.key}})).data.record;
+                activeMenu.organs=this.$core.helper.listToTree((await this.$http.get('/core/authority/organ',{params:{menu:menu.key}})).data.records.map(item=>{item.title=item.organName;item.key=item._id;item.value=item._id;return item}),0);
                 this.ToggleMenu(activeMenu);
             },
         }

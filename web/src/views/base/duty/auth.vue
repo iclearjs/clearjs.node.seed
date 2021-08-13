@@ -83,7 +83,7 @@ export default {
             const result = (await this.$core.model('cdp_menu').get({
                 params: {filter: {idApplication: this.application}, order: "order",}
             })).records;
-            this.menus = this.$helper.listToTree(result, 0, {replaceFields: {key: '_id', value: '_id', title: 'name'}});
+            this.menus = this.$core.helper.listToTree(result, 0, {replaceFields: {key: '_id', value: '_id', title: 'name'}});
             const existMenus = (await this.$core.model('sys_duty_menu').get({
                 params: {
                     filter: {

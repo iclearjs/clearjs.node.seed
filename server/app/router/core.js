@@ -4,6 +4,10 @@ module.exports = app => {
 
   const { router, controller } = app;
 
+  router.post('/core/authority/registerByOrganUser', controller.coreAuthority.registerByOrganUser);
+  router.post('/core/authority/registerOrgan', controller.coreAuthority.registerOrgan);
+
+
   // 数据模型API
   router.get('/core/model/:model', controller.coreModel.get);
   router.get('/core/model/:model/:id', controller.coreModel.getById);
@@ -13,7 +17,7 @@ module.exports = app => {
   router.delete('/core/model/:model/:id', controller.coreModel.destroy);
 
   router.post('/core/getByPost/:model', controller.coreModel.getByPost);
-  router.post('/core/getByAggregate/:model', controller.coreModel.getByAggregate);
+  router.post('/org_organ_user/:model', controller.coreModel.getByAggregate);
   router.get('/core/resolveFilter/:entity', controller.coreModel.getResolveFilter);
 
   // 认证系统API

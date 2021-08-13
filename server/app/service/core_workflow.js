@@ -489,7 +489,7 @@ class BillService extends Service {
         let res;
         /* 判断 条件是否 满足 edge.filter*/
 
-        res = await this.ctx.model[this.ctx.helper.humps.pascalize(pageConfig.idEntityList.code)].findOne({ $and: [ resolveFilter(edge.filter), { _id: workId }] });
+        res = await this.ctx.model[this.ctx.service.coreHelper.humps.pascalize(pageConfig.idEntityList.code)].findOne({ $and: [ resolveFilter(edge.filter), { _id: workId }] });
 
         /* count */
         // switch (edge.idPage.dsType) {
@@ -822,7 +822,7 @@ class BillService extends Service {
       record.nodes = await this.ctx.model.WfWorkflowDesign.aggregate([
         {
           $match: {
-            idWorkflow: this.ctx.helper.toObjectID(idWorkflow),
+            idWorkflow: this.ctx.service.coreHelper.toObjectID(idWorkflow),
             memberType: 'node',
           },
         },
@@ -940,7 +940,7 @@ class BillService extends Service {
       if (bill && bill.length === 1) {
         switch (bill[0].__s) {
           case 2:
-            error = (await this.ctx.service.basePageAction.doVerify(bill[0]._id, operateUser, workflow.idPage)).error;
+            error = (await this.ctx.service.corePage.doVerify(bill[0]._id, operateUser, workflow.idPage)).error;
             await this.pushApprovalMessage({ workId, userIds: [], event: 'WORKFLOW_END' }, {
               PageModel,
               PageConfig,

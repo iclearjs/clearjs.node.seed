@@ -5,7 +5,7 @@
  */
 
 export default {
-    host:'http://192.168.31.100:7002',
+    host:'http://127.0.0.1:7001',
     module:'5f6030c8d88db82c58cf6cbf',
     primaryColor: '#1890FF', // primary color of ant design
     layout:'top',

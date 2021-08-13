@@ -1,14 +1,13 @@
 'use strict';
 module.exports = (app, schema) => {
-    /**https://mongoosejs.com/docs/middleware.html*/
+  /** https://mongoosejs.com/docs/middleware.html*/
 
-    schema.pre('save', async (next) => {
-        next();
-    })
+  schema.post('validate', async (value, next) => {
+    if (!value.organCode) {
+      value.organCode = await app.AutoGenerateCode('O', 'OrgOrgan');
+    }
+    next();
+  });
 
-    schema.post('save', function(doc, next) {
-        next();
-    });
-
-    return schema;
+  return schema;
 };

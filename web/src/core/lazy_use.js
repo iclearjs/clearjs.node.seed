@@ -21,3 +21,6 @@ if(config.platform==='electron'){
 
 import VueStorage from 'vue-ls'
 Vue.use(VueStorage, config.storageOptions);
+
+
+

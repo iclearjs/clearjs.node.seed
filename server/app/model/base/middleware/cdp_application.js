@@ -1,15 +1,15 @@
 'use strict';
 
 module.exports = (app, schema) => {
-    /**https://mongoosejs.com/docs/middleware.html*/
+  /** https://mongoosejs.com/docs/middleware.html*/
+  schema.pre('save', async next => {
 
-    schema.pre('save', async (next) => {
-        next();
-    })
+    next();
+  });
 
-    schema.post('save', function(doc, next) {
-        next();
-    });
+  schema.post('save', function(doc, next) {
+    next();
+  });
 
-    return schema;
+  return schema;
 };

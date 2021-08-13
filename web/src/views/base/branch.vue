@@ -1,6 +1,6 @@
 <template>
     <a-card :bordered="false">
-        <c-button-group style="margin-bottom: 6px"  :buttons="menu.buttons.default" @click="click" :buttonsDisabled="buttonsDisabled" :record="selectedRow" :showSave="PageView==='editing'" :showBack="PageView==='edit'" :showBatch="PageView!=='edit'">
+        <c-button-group style="margin-bottom: 6px"  :buttons="menu.buttons?menu.buttons.default:[]" @click="click" :buttonsDisabled="buttonsDisabled" :record="selectedRow" :showSave="PageView==='editing'" :showBack="PageView==='edit'" :showBatch="PageView!=='edit'">
             <a-input-search v-if="['list','export'].includes(PageView)" v-model="query.like" slot="right" style="width: 200px" placeholder="请输入关键字"  enter-button="搜索"  @search="onTableChange({...query,page:1})">
                 <c-filter slot="addonAfter"  ref="cFilter" :filter="filter" style="display: inline-block"  :idPage="PageConfig._id" :fields="PageConfig.widgets.filter(item=>item.mode==='listCard'&&item.listVisible===true)" @on-search="onSearch"></c-filter>
             </a-input-search>
@@ -18,11 +18,15 @@
     export default {
         name: "user",
         mixins:[Page,PageList,PageEdit],
-        methods:{
-            setDefaultFilter(){
-                this.filter = {idOrgan:this.idOrgan};
-                this.query.filter = this.filter
+        data(){
+          return {
+            query:{
+              likeBy:'branchCode,branchName'
             }
+          }
+        },
+        methods:{
+
         },
     }
 </script>

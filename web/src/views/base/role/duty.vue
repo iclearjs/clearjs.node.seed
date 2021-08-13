@@ -46,6 +46,7 @@ export default {
                     widget: 'RadioRefer',
                     idRefer:'sys_user_refer',
                     referDisplay:'userName',
+                    referType : "Global",
                     referStorage:'_id',
                     visible:true
                 },

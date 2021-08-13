@@ -17,7 +17,7 @@ export default {
                 limit: 10,
                 page: 1,
                 order: '-_id',
-                likeBy:'',
+                likeBy: '',
             },
             filter: {},
             buttonsDisabled: {
@@ -31,10 +31,6 @@ export default {
                     return record && Object.keys(record).length > 0
                 }
             },
-            // idOrgan: '570c733bb49b01f00747fc92', /*hdjt*/
-            // idOrgan: '5f0aff9077fe3a49e094c7a7', /*lt*/
-            // idOrgan: '5bab78d4576fdc766659c318', /*za jia jv*/
-            idOrgan: this.$cookies.get('LOGIN_GROUP'), /*cs*/
             contentHeight: window.innerHeight - 430,
             PageConfig: {
                 widgets: []
@@ -44,22 +40,44 @@ export default {
         }
     },
     computed: {
-        ...mapGetters(["menu", "user", 'token','group']),
+        ...mapGetters(["menu", "user", 'token', 'group', 'organ']),
+        idOrgan({organ,group}) {
+            console.log('organ',organ)
+            return organ?organ:null
+        },
+        idGroupOrgan({group}) {
+            return group
+        },
+        idOrganUser({token}) {
+            return token
+        },
+        idUser({user}) {
+            return user ? user._id : null
+        },
+        uotAllowAccess({organ,PageConfig}){
+            return PageConfig.controlType === 'Organ' && !organ
+        }
     },
     watch: {
         PageView(val) {
             if (val === 'list') {
-                // this.loadRecords()
+                this.loadRecords()
             }
         },
         '$route.query._id': {
             handler() {
                 this.enterSelectedRecord();
             }, deep: true,
-        }
+        },
+        async idOrgan() {
+            await this.setDefaultFilter()
+            this.loadRecords()
+        },
+
     },
     async created() {
         await this.$core.page.getPageConfig(this.menu.idPage).then(async (PageConfig) => {
+
             if (PageConfig._id) {
                 this.PageConfig = PageConfig;
                 if (this.setCurrentDisabled !== void (0)) {
@@ -68,31 +86,50 @@ export default {
                 this.query.populate = [...new Set([...(this.query.populate ? this.query.populate : '').split(','), ...PageConfig.populate])].join(',');
                 this.afterLoadPageConfig && (await this.afterLoadPageConfig());
                 this.setDefaultFilter && await this.setDefaultFilter();
+                /** 若页面类型 组织管控 则需判断组织是否存在 再进行数据拉取 */
+                if (PageConfig.controlType === 'Organ' && !this.idOrgan) {
+                    return
+                } else if (PageConfig.controlType === 'Group' && !this.idGroupOrgan) {
+                    return
+                } else if (PageConfig.controlType === 'GroupAndOrgan' && !this.idGroupOrgan) {
+                    return
+                }
                 this.loadRecords();
             }
         });
         this.enterSelectedRecord()
     },
     methods: {
+
         async enterSelectedRecord() {
             if (this.$route.query._id) {
                 await this.loadRecord({_id: this.$route.query._id});
                 /* 重置路由参数 */
-                this.$router.push({name:this.$route.name});
+                this.$router.push({name: this.$route.name});
                 this.selectedRow = JSON.parse(JSON.stringify(this.selectedRow));
                 this.PageView = 'edit';
                 // this.idOrgan = this.selectedRow.idOrgan;
             }
         },
         async setDefaultFilter() {
-            this.filter = {};
+            if (this.PageConfig.controlType === 'Organ') {
+                this.filter = {idOrgan: this.idOrgan?this.idOrgan:null};
+            } else if (this.PageConfig.controlType === 'Group') {
+                this.filter = {};
+            } else if (this.PageConfig.controlType === 'GroupAndOrgan') {
+                this.filter = await this.$helper.getPageShareFilter(this.idOrgan)
+            }
+            this.query.filter = this.filter
         },
         onSearch(filter) {
             this.query.page = 1;
             this.onTableChange({...this.query, filter: filter});
         },
-
         async click(event, action) {
+            if(this.uotAllowAccess){
+                this.$message.error('请先选择组织')
+                return
+            }
             this.selectType = ['batch', 'batchAction'].includes(action) ? 'checkbox' : 'radio';
             this.PageEvent = action === 'batch' ? event : '';
             this.rowKey = this.PageEvent === 'batchExport' ? this.exportRowKey : '_id';
@@ -130,7 +167,7 @@ export default {
                     break;
             }
         },
-        /* 按钮操作 后重新加载数据并 取消选中状态*/
+        /** 按钮操作 后重新加载数据并 取消选中状态*/
         setSelectNull() {
             this.records = [];
             this.selectedRow = {};
@@ -139,22 +176,28 @@ export default {
         },
 
         async create() {
+            if(this.uotAllowAccess){
+                this.$message.error('请先选择组织')
+                return
+            }
             this.selectedRow = {};
         },
+
         async modify() {
             await this.loadRecord(this.selectedRow)
         },
         async refresh() {
-            this.PageView === 'list' ? this.loadRecords() : this.loadRecord(this.selectedRow);
+            this.PageView === 'list' ? await this.loadRecords() : await this.loadRecord(this.selectedRow);
         },
         /* 数据 筛选条件  @this.filter 各页面自定义条件, @this.query.filter 传入动态条件,@this.searchFilter 查询方案条件 */
         async onTableChange(query) {
             if (this.PageEvent && this[this.PageEvent + 'OnTableChange']) {
                 this[this.PageEvent + 'OnTableChange'](query)
             } else {
-                this.loadRecords(query)
+                await this.loadRecords(query)
             }
         },
+
         customRow(record, index) {
             return {
                 on: {
@@ -201,6 +244,7 @@ export default {
                 },
             }
         },
+
         async loadRecord(record) {
             this.loading = true;
             this.selectedRow = await this.$core.model(this.PageConfig.idEntityCard.dsCollection).getByID(record._id, {params: {populate: this.query.populate}}).then(res => res.records[0]);
@@ -208,6 +252,10 @@ export default {
         },
 
         async loadRecords(query) {
+            if(this.uotAllowAccess){
+                this.$message.error('请先选择组织')
+                return
+            }
             this.loading = true;
             this.query = query ? query : this.query;
             this.query.limit = this.PageConfig.widgets.filter(el => el.field === 'p_id').length > 0 ? 500 : this.query.limit;

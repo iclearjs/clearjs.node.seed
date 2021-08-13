@@ -152,7 +152,7 @@ class CoreAuthorityCtrl extends Controller {
                     name: user.userName,
                     idOrgan: organ._id,
                     userType: 'Admin',
-                    workNo: 'admin',
+                    workNo: '9999',
                     __s: 1
                 });
                 await ctx.model.OrgApplication.create(apps.map(el => {

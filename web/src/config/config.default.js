@@ -6,9 +6,9 @@
 
 export default {
     host:'http://127.0.0.1:7001',
-    module:'5f6030c8d88db82c58cf6cbf',
+    module:'5e7707ae39fb132348423bdc',
     primaryColor: '#1890FF', // primary color of ant design
-    layout:'top',
+    layout:'left',
     platform:'web',
     multiTab:true,
     lang:'zh-CN',

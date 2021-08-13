@@ -2,20 +2,19 @@
     <div class="login">
         <img src="../assets/logo_white.png" height="64" style="float: left;margin:24px 0 0 24px"/>
         <div class="login-form" style="-webkit-app-region: no-drag">
-            <c-login @doLogin="doLogin" @resetPwd="rsVisible=true" @register="rVisible=true"></c-login>
+            <c-login @doLogin="doLogin" @resetPwd="sVisible=true" @register="rVisible=true"></c-login>
         </div>
         <c-register :visible.sync="rVisible" @doRegister="doRegister"></c-register>
-        <c-reset-pwd :visible.sync="rsVisible" @doResetPwd="doResetPwd"></c-reset-pwd>
+        <c-reset-pwd :visible.sync="sVisible" @doResetPwd="doResetPwd"></c-reset-pwd>
         <a-modal v-model="visible" :footer="null" :width="1024" :mask-closable="false" :closable="false" :body-style="{padding:0}">
             <a-card title="已加入组织" :bordered="false" :extra="user&&user.userName+',您好，欢迎使用'">
-                <a-row v-if="organUsers.length>0"
-                       type="flex" justify="start">
+                <a-row v-if="organUsers.length>0" type="flex" justify="start">
                     <template v-for="organUser of organUsers">
                         <a-col span="4" style="padding: 0 10px 10px 0;min-width: 150px" :key="organUser._id">
                             <a title="点击进入系统" style="color: #000000;" @click="goWelcome(organUser)">
                                 <div style="text-align: center">
                                     <a-row style="margin-bottom: 12px">
-                                        <a-avatar shape="square" slot='avatar' :size="80" :style="{backgroundColor:'#ffffff'}">
+                                        <a-avatar shape="square" :size="80" :style="{backgroundColor:'#ffffff'}">
                                             <c-icon type="jiagouliucheng" slot="icon" style="font-size: 80px"></c-icon>
                                         </a-avatar>
                                     </a-row>
@@ -60,7 +59,7 @@
                         </a>
                     </a-col>
                     <a-col span="4" style="padding: 0 10px 10px 0;min-width: 150px">
-                        <a @click="organModal.visible = true" style="color: #000000;">
+                        <a @click="oVisible = true" style="color: #000000;">
                             <div style="text-align: center">
                                 <a-row style="margin-bottom: 24px">
                                     <a-avatar shape="square" :size="80" icon="team" style="background-color:#1890FF"/>
@@ -72,10 +71,10 @@
                 </a-row>
             </a-card>
         </a-modal>
-        <a-modal v-model="organModal.visible" title="组织创建" centered :mask-closable="false" :closable="false" dialogClass="noDrag" @ok="doRegisterOrgan">
-            <a-form-model ref="oForm" labelAlign="left" :model="organModal.form" :rules="organModal.rule" :label-col="{span: 4}" :wrapper-col="{span: 20}">
+        <a-modal v-model="oVisible" title="组织创建" centered :mask-closable="false" :closable="false" dialogClass="noDrag" @ok="doRegisterOrgan">
+            <a-form-model ref="form" labelAlign="left" :model="form" :rules="rule" :label-col="{span: 4}" :wrapper-col="{span: 20}">
                 <a-form-model-item label="组织名称" prop="organName">
-                    <a-input v-model="organModal.form.organName"/>
+                    <a-input v-model="form.organName"/>
                 </a-form-model-item>
             </a-form-model>
         </a-modal>
@@ -104,15 +103,13 @@ export default {
         return {
             visible: false,
             rVisible: false,
-            rsVisible: false,
-            organModal: {
-                visible: false,
-                form: {
-                    organName: '',
-                },
-                rule: {
-                    organName: [{required: true, validator: validateOrganNamePass, trigger: 'change'}],
-                }
+            sVisible: false,
+            oVisible: false,
+            form: {
+                organName: '',
+            },
+            rule: {
+                organName: [{required: true, validator: validateOrganNamePass, trigger: 'change'}],
             },
             organ: require('../assets/icon/organ.png'),
             organUsers: [],
@@ -164,18 +161,18 @@ export default {
         async doResetPwd(user) {
             const result = await this.$http.post(this.$url.changePwd, user);
             if (result.data.error.code === '0') {
-                this.$success({title: '密码修改成功！',onOk:()=>{this.rsVisible=false;}});
+                this.$success({title: '密码修改成功！',onOk:()=>{this.sVisible=false;}});
             }
         },
         async doRegisterOrgan() {
-            this.$refs.oForm.validate(async (valid) => {
+            this.$refs.form.validate(async (valid) => {
                 if (valid) {
                     const result = await this.$http.post(this.$url.registerOrgan, {
-                        ...this.organModal.form,
+                        ...this.form,
                         idUser: this.user._id
                     });
                     if (result.data.error.code === '0') {
-                        this.organModal.visible = false;
+                        this.oVisible = false;
                         await this.getUserOrgans(this.user._id);
                     }
                 }

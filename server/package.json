@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@clearjs/mongoose": "0.0.1",
-    "@clearjs/node": "0.2.2",
+    "@clearjs/node": "0.2.3",
     "axios": "^0.21.1",
     "bignumber.js": "^9.0.1",
     "egg": "^2.15.1",

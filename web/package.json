@@ -14,8 +14,8 @@
   "main": "background.js",
   "dependencies": {
     "@antv/g2": "^4.1.19",
-    "@clearjs/node": "0.2.2",
-    "@clearui/vue": "0.2.2",
+    "@clearjs/node": "0.2.3",
+    "@clearui/vue": "0.2.3",
     "ant-design-vue": "^1.7.5",
     "axios": "^0.19.2",
     "bignumber.js": "^9.0.1",

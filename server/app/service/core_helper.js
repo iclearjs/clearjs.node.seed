@@ -26,7 +26,7 @@ class CoreHelper extends Service {
       return await ctx.model.SysRoleDuty.aggregate([
         {
           $match: {
-            idOrgan: ctx.service.coreHelper.toObjectID(idOrgan),
+            idOrgan: ctx.helper.toObjectID(idOrgan),
           },
         },
         {
@@ -42,7 +42,7 @@ class CoreHelper extends Service {
         },
         {
           $match: {
-            idMenu: ctx.service.coreHelper.toObjectID(idMenu),
+            idMenu: ctx.helper.toObjectID(idMenu),
           },
         },
         {
@@ -129,7 +129,7 @@ class CoreHelper extends Service {
     const { ctx } = this;
     const { idGroupOrgan } = await ctx.model.OrgOrgan.findOne({ _id: idOrgan }).lean();
     const Organs = await ctx.model.OrgOrgan.find({ idGroupOrgan }).lean();
-    const parents = ctx.service.coreHelper.getTreeParent(Organs, idOrgan);
+    const parents = ctx.helper.getTreeParent(Organs, idOrgan);
     return parents ? parents.split(',').filter(el => el) : [];
   }
 
@@ -151,7 +151,7 @@ class CoreHelper extends Service {
       } = ctx.locals.pages.filter(el => el.type === 'bill' && el.isWorkflow && el.idEntityCard && el.idEntityCard.code === model)[0];
       const access_token = decodeURIComponent(ctx.cookies.get('access_token', { signed: false }));
       if (!access_token || !/^[a-fA-F0-9]{24}$/.test(access_token)) {
-        return model.indexOf('view_') < 0 ? result : ctx.service.coreHelper.toObjectIDs(result);
+        return model.indexOf('view_') < 0 ? result : ctx.helper.toObjectIDs(result);
       }
       const user = await ctx.model.OrgOrganUser.findOne({ _id: access_token }).lean();
 
@@ -219,9 +219,9 @@ class CoreHelper extends Service {
           result.createdUser = addFilterInField(result.createdUser, [ user.idUser ]);
         }
       }
-      return model.indexOf('view_') < 0 ? result : ctx.service.coreHelper.toObjectIDs(result);
+      return model.indexOf('view_') < 0 ? result : ctx.helper.toObjectIDs(result);
     }
-    return model.indexOf('view_') < 0 ? filter : ctx.service.coreHelper.toObjectIDs(filter);
+    return model.indexOf('view_') < 0 ? filter : ctx.helper.toObjectIDs(filter);
 
   }
 

@@ -822,7 +822,7 @@ class BillService extends Service {
       record.nodes = await this.ctx.model.WfWorkflowDesign.aggregate([
         {
           $match: {
-            idWorkflow: this.ctx.service.coreHelper.toObjectID(idWorkflow),
+            idWorkflow: this.ctx.helper.toObjectID(idWorkflow),
             memberType: 'node',
           },
         },

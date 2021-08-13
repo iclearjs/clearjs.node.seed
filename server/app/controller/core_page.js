@@ -41,7 +41,7 @@ class CorePageCtrl extends Controller {
           }
         }
       }
-      pipeline.unshift({ $match: ctx.service.coreHelper.toObjectIDs(filter) });
+      pipeline.unshift({ $match: ctx.helper.toObjectIDs(filter) });
 
       /* 若存在分页信息 */
       const likeFilter = {};
@@ -57,7 +57,7 @@ class CorePageCtrl extends Controller {
       Object.keys(filter).length > 0 && prePipeline.push({ $match: filter });
       Object.keys(likeFilter).length > 0 && prePipeline.push({ $match: likeFilter });
 
-      records = await ctx.model[this.ctx.helper.humps.pascalize(pageConfig.idEntityList.dsCollection)].aggregate([ ...ctx.service.coreHelper.toObjectIDs(prePipeline), ...ctx.service.coreHelper.getAggregatePaging({
+      records = await ctx.model[this.ctx.helper.humps.pascalize(pageConfig.idEntityList.dsCollection)].aggregate([ ...ctx.helper.toObjectIDs(prePipeline), ...ctx.service.coreHelper.getAggregatePaging({
         order,
         skip: page ? skip : 0,
         limit: page ? limit : 0,

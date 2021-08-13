@@ -379,7 +379,7 @@ class CoreAuthorityCtrl extends Controller {
                 // 获得父组件集合
                 for (const um of UserMenu) {
                     if (um._id) {
-                        const parents = this.ctx.service.coreHelper.getTreeParent(menu, um._id.p_id);
+                        const parents = this.ctx.helper.getTreeParent(menu, um._id.p_id);
                         if (parents) {
                             for (const p of parents.split(',')) {
                                 pMenuIds.push(p);
@@ -618,7 +618,7 @@ class CoreAuthorityCtrl extends Controller {
                             idRole: {
                                 $in: user.roles,
                             },
-                            'dutyMenu.idMenu': this.ctx.service.coreHelper.toObjectID(this.ctx.request.query.menu),
+                            'dutyMenu.idMenu': this.ctx.helper.toObjectID(this.ctx.request.query.menu),
                         },
                     }, {
                         $group: {
@@ -650,7 +650,7 @@ class CoreAuthorityCtrl extends Controller {
 
                 // 判断每一个组织的父节点是否在已有权限组织集合当中，如果没有添加到父组织集合吗，并将其设为disabled以便前端不能选择
                 for (const organ of organs) {
-                    const parents = this.ctx.service.coreHelper.getTreeParent(wholeOrgans.map(e => {
+                    const parents = this.ctx.helper.getTreeParent(wholeOrgans.map(e => {
                         return {...e, id: e._id.toString()};
                     }), organ._id.p_id).split(',');
                     for (const parent of parents) {

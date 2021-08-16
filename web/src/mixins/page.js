@@ -4,21 +4,16 @@ import {mapGetters} from "vuex";
 export default {
     data() {
         return {
-            selectedRows: [],
-            selectedRow: {},
+            loading: false,
+            query: { limit: 10, page: 1, order: '-_id', likeBy: '' },
             records: [],
             count: 0,
+            selectedRow: {},
+            selectedRows: [],
             selectedRowKeys: [],
             rowKey: '_id',
             exportRowKey: '_id',
             selectType: 'radio',
-            loading: false,
-            query: {
-                limit: 10,
-                page: 1,
-                order: '-_id',
-                likeBy: '',
-            },
             filter: {},
             buttonsDisabled: {
                 switch: (record) => {
@@ -37,46 +32,43 @@ export default {
             },
             PageView: 'list',
             PageEvent: '',
-            idPage:'',
         }
     },
     computed: {
         ...mapGetters(["menu", "user", 'token', 'group', 'organ']),
-        idOrgan({organ,group}) {
-            console.log('organ',organ)
-            return organ?organ:null
-        },
-        idGroupOrgan({group}) {
-            return group
+        idUser({user}) {
+            return user ? user._id : null
         },
         idOrganUser({token}) {
             return token
         },
-        idUser({user}) {
-            return user ? user._id : null
+        idOrgan({organ}) {
+            return organ ? organ : null
         },
-        uotAllowAccess({organ,PageConfig}){
-            return PageConfig.controlType === 'Organ' && !organ
-        }
+        idOrganRequired({organ, PageConfig}) {
+            return ['Organ','GroupAndOrgan'].includes(PageConfig.controlType)&& !organ
+        },
+        idGroupOrgan({group}) {
+            return group
+        },
     },
     watch: {
-        PageView(val) {
-            if (val === 'list') {
-                this.loadRecords()
-            }
-        },
         '$route.query._id': {
             handler() {
-                this.enterSelectedRecord();
+                this.goPageViewEdit()
             }, deep: true,
+        },
+        async PageView(val) {
+            if (val === 'list') {
+                await this.loadRecords()
+            }
         },
         async idOrgan() {
             await this.setDefaultFilter()
-            this.idPage===this.menu.idPage&&this.loadRecords()
+            this.PageConfig._id === this.menu.idPage && await this.loadRecords()
         },
     },
     async created() {
-        this.idPage=this.menu.idPage;
         await this.$core.page.getPageConfig(this.menu.idPage).then(async (PageConfig) => {
             if (PageConfig._id) {
                 this.PageConfig = PageConfig;
@@ -94,25 +86,24 @@ export default {
                 } else if (PageConfig.controlType === 'GroupAndOrgan' && !this.idGroupOrgan) {
                     return
                 }
-                this.loadRecords();
+                await this.loadRecords();
             }
         });
-        this.enterSelectedRecord()
+        await this.goPageViewEdit()
     },
     methods: {
-        async enterSelectedRecord() {
+        async goPageViewEdit() {
             if (this.$route.query._id) {
                 await this.loadRecord({_id: this.$route.query._id});
                 /* 重置路由参数 */
-                this.$router.push({name: this.$route.name});
+                await this.$router.push({name: this.$route.name});
                 this.selectedRow = JSON.parse(JSON.stringify(this.selectedRow));
                 this.PageView = 'edit';
-                // this.idOrgan = this.selectedRow.idOrgan;
             }
         },
         async setDefaultFilter() {
             if (this.PageConfig.controlType === 'Organ') {
-                this.filter = {idOrgan: this.idOrgan?this.idOrgan:null};
+                this.filter = {idOrgan: this.idOrgan ? this.idOrgan : null};
             } else if (this.PageConfig.controlType === 'Group') {
                 this.filter = {};
             } else if (this.PageConfig.controlType === 'GroupAndOrgan') {
@@ -120,12 +111,12 @@ export default {
             }
             this.query.filter = this.filter
         },
-        onSearch(filter) {
+        async onSearch(filter) {
             this.query.page = 1;
-            this.onTableChange({...this.query, filter: filter});
+            await this.onTableChange({...this.query, filter: filter});
         },
         async click(event, action) {
-            if(this.uotAllowAccess){
+            if (this.idOrganRequired) {
                 this.$message.error('请先选择组织')
                 return
             }
@@ -175,7 +166,7 @@ export default {
         },
 
         async create() {
-            if(this.uotAllowAccess){
+            if (this.idOrganRequired) {
                 this.$message.error('请先选择组织')
                 return
             }
@@ -196,7 +187,6 @@ export default {
                 await this.loadRecords(query)
             }
         },
-
         customRow(record, index) {
             return {
                 on: {
@@ -232,12 +222,12 @@ export default {
                             }
                         }
                     },
-                    dblclick: () => {
+                    dblclick:async () => {
                         if (this.PageEvent && this[this.PageEvent + 'OnDblClick']) {
                             this[this.PageEvent + 'OnDblClick'](record, index)
                         } else {
                             this.PageView = 'edit';
-                            this.loadRecord(record)
+                            await this.loadRecord(record)
                         }
                     },
                 },
@@ -251,7 +241,7 @@ export default {
         },
 
         async loadRecords(query) {
-            if(this.uotAllowAccess){
+            if (this.idOrganRequired) {
                 this.$message.error('请先选择组织')
                 return
             }

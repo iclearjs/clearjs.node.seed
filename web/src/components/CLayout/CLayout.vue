@@ -19,7 +19,7 @@
                 </a-layout-sider>
                 <a-layout>
                     <multi-tab v-if="multiTab" :style="{ margin: '2px 12px' }"></multi-tab>
-                    <a-layout-content :style="{ margin: '0  12px 2px 12px', background: '#fff', minHeight: '280px' }">
+                    <a-layout-content :style="{ margin: '0  12px 12px 12px', background: '#fff', minHeight: innerHeight,maxHeight:innerHeight,overflow:'auto' }">
                         <keep-alive v-if="multiTab">
                             <router-view/>
                         </keep-alive>
@@ -32,80 +32,81 @@
 </template>
 
 <script>
-    import Menu from "@/components/Menu"
-    import CLayoutHeader from "@/components/CLayoutHeader";
-    import MultiTab from "@/components/MultiTab";
-    import {mapGetters, mapActions} from 'vuex'
-    export default {
-        name: "basic",
-        components: {MultiTab, CLayoutHeader, Menu},
-        data() {
-            return {
-                collapsed: false,
-                applications:[],
-                application:{},
-                menus: [],
-            };
-        },
-        created() {
-            this.loadApplications();
-            this.applicationSelect(this.module);
-            this.ToggleMenu(this.menu);
-        },
-        computed: {
-            ...mapGetters(["layout","module","menu","multiTab"]),
-        },
-        watch:{
-            async module(value){
-                await this.loadApplication(value);
-                await this.loadMenu(value);
-            }
-        },
-        methods: {
-            ...mapActions(['ToggleModule','ToggleMenu']),
-            async loadApplication(module){
-                this.application=await this.$core.model('cdp_application').getByID(module).then(res=>res.records[0])
-            },
-            async loadApplications(){
-                this.applications=(await this.$http.get('/core/authority/application')).data.records.map(item=>{item.idApplication.title=item.idApplication.name;item.idApplication.key=item.idApplication._id;item.idApplication.icon='appstore';return item.idApplication});
-            },
-            async applicationSelect(application) {
-                await this.ToggleModule(application);
-                await this.loadApplication(application)
-                await this.loadMenu(application)
-            },
-            async loadMenu(module){
-                const menusArray=(await this.$http.get('/core/authority/menu',{params:{application:module}})).data.records.map(item=>{item.title=item.name;item.key=item._id;return item});
-                this.menus=this.$core.helper.listToTree(menusArray,0)
-            },
-            async menuSelect(menu) {
-
-                const activeMenu = this.$core.helper.getTreeNode(this.menus, menu.key);
-                activeMenu.keyPath = menu.keyPath;
-                activeMenu.buttons=(await this.$http.get('/core/authority/button',{params:{menu:menu.key}})).data.record;
-                activeMenu.organs=this.$core.helper.listToTree((await this.$http.get('/core/authority/organ',{params:{menu:menu.key}})).data.records.map(item=>{item.title=item.organName;item.key=item._id;item.value=item._id;return item}),0);
-                this.ToggleMenu(activeMenu);
-            },
+import Menu from "@/components/Menu"
+import CLayoutHeader from "@/components/CLayoutHeader";
+import MultiTab from "@/components/MultiTab";
+import {mapGetters, mapActions} from 'vuex'
+export default {
+    name: "basic",
+    components: {MultiTab, CLayoutHeader, Menu},
+    data() {
+        return {
+            innerHeight:window.innerHeight - 100,
+            collapsed: false,
+            applications:[],
+            application:{},
+            menus: [],
+        };
+    },
+    created() {
+        this.loadApplications();
+        this.applicationSelect(this.module);
+        this.ToggleMenu(this.menu);
+    },
+    computed: {
+        ...mapGetters(["layout","module","menu","multiTab"]),
+    },
+    watch:{
+        async module(value){
+            await this.loadApplication(value);
+            await this.loadMenu(value);
         }
+    },
+    methods: {
+        ...mapActions(['ToggleModule','ToggleMenu']),
+        async loadApplication(module){
+            this.application=await this.$core.model('cdp_application').getByID(module).then(res=>res.records[0])
+        },
+        async loadApplications(){
+            this.applications=(await this.$http.get('/core/authority/application')).data.records.map(item=>{item.idApplication.title=item.idApplication.name;item.idApplication.key=item.idApplication._id;item.idApplication.icon='appstore';return item.idApplication});
+        },
+        async applicationSelect(application) {
+            await this.ToggleModule(application);
+            await this.loadApplication(application)
+            await this.loadMenu(application)
+        },
+        async loadMenu(module){
+            const menusArray=(await this.$http.get('/core/authority/menu',{params:{application:module}})).data.records.map(item=>{item.title=item.name;item.key=item._id;return item});
+            this.menus=this.$core.helper.listToTree(menusArray,0)
+        },
+        async menuSelect(menu) {
+
+            const activeMenu = this.$core.helper.getTreeNode(this.menus, menu.key);
+            activeMenu.keyPath = menu.keyPath;
+            activeMenu.buttons=(await this.$http.get('/core/authority/button',{params:{menu:menu.key}})).data.record;
+            activeMenu.organs=this.$core.helper.listToTree((await this.$http.get('/core/authority/organ',{params:{menu:menu.key}})).data.records.map(item=>{item.title=item.organName;item.key=item._id;item.value=item._id;return item}),0);
+            this.ToggleMenu(activeMenu);
+        },
     }
+}
 </script>
 
 <style scoped lang="less">
-    #basic-layout {
-        height: 100%;
-    }
+#basic-layout {
+    height: 100%;
+}
 
-    #basic-layout .trigger {
-        font-size: 18px;
-        line-height: 64px;
-        padding: 0 32px;
-        cursor: pointer;
-        transition: color 0.3s;
-    }
+#basic-layout .trigger {
+    font-size: 18px;
+    line-height: 64px;
+    padding: 0 32px;
+    cursor: pointer;
+    transition: color 0.3s;
+}
 
-    #basic-layout .trigger:hover {
-        color: #1890ff;
-    }
+#basic-layout .trigger:hover {
+    color: #1890ff;
+}
 </style>
 
 

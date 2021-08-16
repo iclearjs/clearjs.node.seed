@@ -37,38 +37,17 @@ export default {
         }
     },
     methods: {
-
-
         //提交
         async submit() {
             await this.doSubmit([this.selectedRow]);
             this.PageView === 'list' && this.setSelectNull();
             this.PageView === 'list' ? this.loadRecords() : this.loadRecord(this.selectedRow);
         },
-
+        //复制
         async copy() {
             await this.doCopy(this.selectedRow)
             this.PageView = 'editing';
         },
-
-        doCopy(selectedRow){
-            let record = JSON.parse(JSON.stringify(selectedRow));
-            delete record._id;
-            delete record.__s;
-            delete record.billCode;
-            delete record.idWorkflow;
-            delete record.createdAt;
-            delete record.createdUser;
-            delete record.submitAt;
-            delete record.submitUser;
-            delete record.verifyUser;
-            delete record.verifyAt;
-            record.records && Array.isArray(record.records)&&record.records.forEach(item => {
-                delete item._id;
-            });
-            this.selectedRow = record;
-        },
-
         //撤回
         async revoke() {
             await this.doRevoke([this.selectedRow]);
@@ -237,9 +216,7 @@ export default {
             this.query.page = 1;
             this.loadRecords({...this.query, filter: this.filter})
         },
-        /*< 导出相关逻辑 */
-
-
+        /*导出相关逻辑 */
         batchExport() {
             this.query.page = 1;
             this.$refs.cFilter.clear();
@@ -255,7 +232,6 @@ export default {
             this.query.page = 1;
             this.loadRecords({...this.query, filter: this.filter});
         },
-
         batchExportAction() {
             let rowKey = this.exportRowKey ? this.exportRowKey : this.rowKey;
             if (this.selectedRows.length > 0) {
@@ -281,7 +257,6 @@ export default {
             this.setSelectNull();
             this.batchExportOnTableChange({...this.query, page: 1});
         },
-
         async batchExportOnTableChange(query) {
             this.loading = true;
             this.query = query ? query : this.query;
@@ -314,22 +289,45 @@ export default {
             this.loading = false;
         },
 
-
+        async doCopy(selectedRow){
+            let record = JSON.parse(JSON.stringify(selectedRow));
+            record=this.beforeCopy?await this.beforeCopye(record):record;
+            delete record._id;
+            delete record.__s;
+            delete record.billCode;
+            delete record.idWorkflow;
+            delete record.createdAt;
+            delete record.createdUser;
+            delete record.submitAt;
+            delete record.submitUser;
+            delete record.verifyUser;
+            delete record.verifyAt;
+            record.records && Array.isArray(record.records)&&record.records.forEach(item => {
+                delete item._id;
+            });
+            this.selectedRow = record;
+            this.afterCopy&&await this.afterCopy(record);
+        },
         async doSubmit(records) {
+            records=this.beforeSubmit?await this.beforeSubmit(records):records;
             for (let record of records) {
                 await this.$http.post(`/core/page/submit/${this.PageConfig._id}/${record._id}`,{
                     operateUser:this.user._id
                 });
             }
+            this.afterSubmit&&await this.afterSubmit(records);
         },
         async doRevoke(records) {
+            records=this.beforeRevoke?await this.beforeRevoke(records):records;
             for (let record of records) {
                 await this.$http.post(`/core/page/revoke/${this.PageConfig._id}/${record._id}`,{
                     operateUser:this.user._id
                 });
             }
+            this.afterRevoke&&await this.afterRevoke(records);
         },
         async doVerify(records) {
+            records=this.beforeVerify?await this.beforeVerify(records):records;
             if(records.length === 1){
                 if(records[0].idWorkflow){
                     this.$WorkFlowAction({
@@ -356,41 +354,46 @@ export default {
                     });
                 }
             }
+            this.afterVerify&&await this.afterVerify(records);
         },
         async doAbandon(records) {
+            records=this.beforeAbandon?await this.beforeAbandon(records):records;
             for (let record of records) {
                 await this.$http.post(`/core/page/abandon/${this.PageConfig._id}/${record._id}`,{
                     operateUser:this.user._id
                 });
             }
-
-
+            this.afterAbandon&&await this.afterAbandon(records);
         },
         async doOpen(records) {
+            records=this.beforeOpen?await this.beforeOpen(records):records;
             for (let record of records) {
                 await this.$http.post(`/core/page/open/${this.PageConfig._id}/${record._id}`,{
                     operateUser:this.user._id
                 });
             }
+            this.afterOpen&&await this.afterOpen(records);
         },
         async doClose(records) {
+            records=this.beforeClose?await this.beforeClose(records):records;
             for (let record of records) {
                 await this.$http.post(`/core/page/close/${this.PageConfig._id}/${record._id}`,{
                     operateUser:this.user._id
                 });
             }
-            this.PageView === 'list' && this.setSelectNull();
-            this.PageView === 'list' ? this.loadRecords() : this.loadRecord(this.selectedRow);
+            this.afterClose&&await this.afterClose(records);
         },
         async doRemove(records) {
+            records=this.beforeRemove?await this.beforeRemove(records):records;
             for (let record of records) {
                 await this.$http.post(`/core/page/remove/${this.PageConfig._id}/${record._id}`,{
                     operateUser:this.user._id
                 });
             }
+            this.afterRemove&&await this.afterRemove(records);
         },
-
         async doSwitch(records) {
+            records=this.beforeSwitch?await this.beforeSwitch(records):records;
             for (let record of records) {
                 let __s = record.__s === 1 ? 0 : 1;
                 await this.$core.model(this.PageConfig.idEntityCard.dsCollection).patch(record._id, {
@@ -399,8 +402,8 @@ export default {
                     updatedUser: this.user._id
                 });
             }
+            this.afterSwitch&&await this.afterSwitch(records);
         },
-
         async doExport(query) {
             query = query ? query : {};
             const url = this.$http.getUri({

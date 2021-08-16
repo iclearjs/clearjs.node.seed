@@ -11,7 +11,7 @@ export default {
         async conserve() {
             const validate = () => {
                 let fields = this.PageConfig.widgets.filter(item => item.mode === 'listCard');
-                function isRowValAllow(row, field) {
+                function requiredCheck(row, field) {
                     let result = true;
                     switch (field.widget) {
                         case 'Number':
@@ -37,7 +37,7 @@ export default {
                         const tab = fields.filter(el => el._id === nfw.p_id)[0];
                         this.selectedRow[nfw.field]&&this.selectedRow[nfw.field].forEach((item, index) => {
                             tableFields.forEach(field => {
-                                if (!isRowValAllow(item, field)) {
+                                if (!requiredCheck(item, field)) {
                                     content.push(`表格${tab ? tab.name : ''}第${Number(index) + 1}行字段${field.name}值未填写。`)
                                 }
                             })
@@ -46,7 +46,7 @@ export default {
                     if (nfw.widget === 'Grid') {
                         const gridFields = fields.filter(el => el.p_id === nfw._id && !el.readonly && el.visible && el.required && !['Table', 'Grid', 'Tab'].includes(el.widget));
                         for (let gf of gridFields) {
-                            if (!isRowValAllow(this.selectedRow, gf)) {
+                            if (!requiredCheck(this.selectedRow, gf)) {
                                 content.push(`表单字段${gf.name}值未填写。`)
                             }
                         }
@@ -54,7 +54,7 @@ export default {
                     if (nfw.widget === 'Tab') {
                         const tabFields = fields.filter(el => el.p_id === nfw._id && !el.readonly && el.visible && el.required && !['Table', 'Grid', 'Tab'].includes(el.widget));
                         for (let tf of tabFields) {
-                            if (!isRowValAllow(this.selectedRow, tf)) {
+                            if (!requiredCheck(this.selectedRow, tf)) {
                                 content.push(`表单字段${tf.name}值未填写。`)
                             }
                         }
@@ -74,6 +74,7 @@ export default {
         },
 
         async doConserve(record) {
+            record=this.beforeConserve?await this.beforeConserve(record):record;
             if (record._id) {
                 await this.$http.post(`/core/page/modify/${this.PageConfig._id}/${record._id}`,{
                     ...record,
@@ -89,12 +90,7 @@ export default {
                 }).then(el=>el.data.records);
                 await this.loadRecord(record)
             }
-        },
-
-        async cancel() {
-            if (this.selectedRow._id) {
-                await this.loadRecord(this.selectedRow)
-            }
+            this.afterConserve&&await this.afterConserve(record);
         },
 
         async onRecordChange(value, field, scope, model) {
@@ -106,6 +102,12 @@ export default {
         async goBack() {
             this.setSelectNull();
             await this.onTableChange({...this.query, page: 1});
+        },
+
+        async cancel() {
+            if (this.selectedRow._id) {
+                await this.loadRecord(this.selectedRow)
+            }
         },
     }
 }

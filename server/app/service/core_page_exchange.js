@@ -61,9 +61,9 @@ class CorePageExchange extends Service {
             delete SettingExchange._id;
             const logExchange = await this.ctx.model.LogExchange.create({ ...SettingExchange, request: ExchangeRecord, response: result ? result.data : error, state: error.code === '0' && result.data.error.code === '0' ? 1 : 0 });
             if (result && result.data && result.data.error && result.data.error.code === '0') {
-              this.ctx.service.coreEvent.push('EXCHANGE_02', JSON.parse(JSON.stringify(logExchange)), { message: error.message });
+              this.ctx.service.coreEvent.push('EXCHANGE_SUCCESS', JSON.parse(JSON.stringify(logExchange)), { message: error.message });
             } else {
-              this.ctx.service.coreEvent.push('EXCHANGE_01', JSON.parse(JSON.stringify(logExchange)), { message: error.message });
+              this.ctx.service.coreEvent.push('EXCHANGE_FAIL', JSON.parse(JSON.stringify(logExchange)), { message: error.message });
               error.code = '900';
               error.message = '同步数据失败！';
             }
